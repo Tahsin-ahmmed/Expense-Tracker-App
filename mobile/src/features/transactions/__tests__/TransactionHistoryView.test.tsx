@@ -54,9 +54,10 @@ describe('TransactionHistoryView', () => {
     expect(screen.getByTestId('month-expense')).toHaveTextContent('৳250.00');
     expect(screen.getByText('Today')).toBeOnTheScreen();
     expect(screen.getByText('1 Nov')).toBeOnTheScreen();
-    // Day net total and the row amount are the same for a one-transaction day.
-    expect(screen.getAllByText('−৳250.00')).toHaveLength(2);
-    expect(screen.getAllByText('+৳50,000.00')).toHaveLength(2);
+    // Day totals sit in brackets next to the day name.
+    expect(screen.getByTestId('day-total-2026-11-12')).toHaveTextContent('(−৳250.00)');
+    expect(screen.getByTestId('day-total-2026-11-01')).toHaveTextContent('(+৳50,000.00)');
+    expect(screen.getByText('−৳250.00')).toBeOnTheScreen(); // the row itself
   });
 
   it('opens a transaction when tapped', async () => {

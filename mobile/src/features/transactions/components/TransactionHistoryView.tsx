@@ -128,8 +128,12 @@ export function TransactionHistoryView({
           <AppText variant="label" color="textSecondary">
             {formatDateLabel(section.date, today)}
           </AppText>
-          <AppText variant="caption" color={section.net < 0 ? 'expense' : 'income'}>
-            {`${section.net < 0 ? '−' : '+'}${formatMoney(toMinor(Math.abs(section.net)))}`}
+          {/* Day total in brackets right after the day name, e.g. "Today (−৳2,000.00)". */}
+          <AppText
+            variant="caption"
+            color={section.net < 0 ? 'expense' : 'income'}
+            testID={`day-total-${section.date}`}>
+            {`(${section.net < 0 ? '−' : '+'}${formatMoney(toMinor(Math.abs(section.net)))})`}
           </AppText>
         </View>
       )}
@@ -175,8 +179,8 @@ const styles = StyleSheet.create({
   },
   dayHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: spacing.xs,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },

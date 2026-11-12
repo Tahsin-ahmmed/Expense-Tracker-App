@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1–M6 done (M6 awaiting device confirmation). M7 implemented, awaiting review. Next: M8.
+**Current milestone:** M1–M7 done. Pre-M8 redesign in phases: A (profile, currency, opening balance & carry-over, settings menu, dashboard budget card) implemented, awaiting review; B dark mode; C transactions page + report line chart; D custom categories. Then M8.
 
 ## 12. Repository Notes
 
@@ -185,7 +185,8 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 - Mobile source layout (`mobile/src/`): `app/` routes only (thin screens) · `components/ui/` reusable UI · `features/<name>/` feature code (components, hooks, services, types) · `domain/` plain-TS business rules (e.g. `money.ts`) · `data/` repositories (local now, Supabase in M6) · `theme/` tokens · `i18n/` strings via `t()`.
 - Auth: sign in with email OR phone number plus a 6-digit numeric PIN (stored as the Supabase password). The app enforces digits-only and rejects easy PINs; the server enforces min length 6. No email/SMS confirmation yet; SMS OTP on new devices is the planned follow-up.
 - Never hardcode user-facing strings, colours or spacing: use `t()`, `colors`, `spacing`/`radius`, and `AppText` variants.
-- Money: `Poisha` type in `src/domain/money.ts`; use `parseTakaInput` and `formatTaka` (lakh/crore grouping).
+- Money: `MinorAmount` (integer hundredths) in `src/domain/money.ts`; use `parseAmountInput` and `formatMoney`/`formatMoneyCompact`. Currency is per user (`profiles.currency`, 15 two-decimal currencies in `src/domain/currency.ts`); amounts are never converted. DB money columns keep their names (`amount_poisha` = minor units). Display currency is applied via `applyDisplayCurrency` and `Screen` remounts content when it changes.
+- Balance: opening balance + date in the profile; `currentBalance`/`monthStart` in `src/domain/balance.ts` calculate carry-over (never stored). Transactions before the opening date are history only.
 - Dates: transactions store `occurredOn` as an `IsoDate` calendar day in Dhaka (`src/domain/date.ts`, fixed UTC+6) plus a UTC `createdAt`. Get "today" in components via `useToday()`.
 - Data: online-first Supabase behind repository interfaces in `mobile/src/data/repositories.ts`; implementations in `mobile/src/data/supabase/`. Schema changes = new file via `npx supabase migration new <name>` at the repo root, preview with `npx supabase db push --remote --dry-run`, show the user, then push; never edit an applied migration. After schema changes regenerate `mobile/src/data/supabase/database.types.ts` (`npx supabase gen types --lang=typescript --remote --schema public`). RLS checks: `supabase/tests/rls_check.sql` (needs user consent to run on the live project).
 - Session: Supabase session encrypted with AES-GCM (key in SecureStore, data in AsyncStorage). On account change all data stores are reset (`clearDataOnAccountChange`).

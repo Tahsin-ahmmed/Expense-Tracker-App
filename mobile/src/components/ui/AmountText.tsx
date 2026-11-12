@@ -1,17 +1,17 @@
-import { formatTaka, type Poisha } from '@/domain/money';
+import { formatMoney, type MinorAmount } from '@/domain/money';
 import type { TransactionType } from '@/domain/transaction';
 
 import { AppText, type AppTextProps } from './AppText';
 
 export interface AmountTextProps extends Omit<AppTextProps, 'children' | 'color'> {
-  amount: Poisha;
+  amount: MinorAmount;
   /** When set, shows a +/− sign and income/expense colour. */
   type?: TransactionType;
 }
 
-/** A Taka amount formatted with lakh/crore grouping. */
+/** An amount in the active currency (lakh/crore grouping where that currency uses it). */
 export function AmountText({ amount, type, variant = 'body', ...rest }: AmountTextProps) {
-  const formatted = formatTaka(amount);
+  const formatted = formatMoney(amount);
   if (!type) {
     return (
       <AppText variant={variant} {...rest}>

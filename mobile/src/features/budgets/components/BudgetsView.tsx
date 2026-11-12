@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText, Button, Card, SectionHeader } from '@/components/ui';
 import { OVERALL_SCOPE, type BudgetScope, type MonthBudgets } from '@/domain/budget';
 import { EXPENSE_CATEGORY_IDS } from '@/domain/category';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import { t } from '@/i18n';
 import { colors, spacing } from '@/theme';
 
@@ -67,7 +67,7 @@ export function BudgetsView({ budgets, onEdit }: BudgetsViewProps) {
               <View key={categoryId} style={index > 0 && styles.separated}>
                 <UnsetBudgetRow
                   categoryId={categoryId}
-                  spent={budgets.spent.get(categoryId) ?? toPoisha(0)}
+                  spent={budgets.spent.get(categoryId) ?? toMinor(0)}
                   onPress={() => onEdit(categoryId)}
                 />
               </View>

@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Icon, ProgressBar } from '@/components/ui';
 import { OVERALL_SCOPE, type BudgetProgress, type BudgetStatus } from '@/domain/budget';
-import { formatTaka, toPoisha } from '@/domain/money';
+import { formatMoney, toMinor } from '@/domain/money';
 import { CategoryBadge } from '@/features/transactions/components/CategoryBadge';
 import { t, type TranslationKey } from '@/i18n';
 import { colors, radius, spacing, type ColorToken } from '@/theme';
@@ -27,13 +27,13 @@ export function BudgetCard({ progress, onPress }: BudgetCardProps) {
   const status = STATUS[progress.status];
   const statusLabel = t(status.labelKey);
   const spentOfLimit = t('budgets.spentOfLimit', {
-    spent: formatTaka(progress.spent),
-    limit: formatTaka(progress.limit),
+    spent: formatMoney(progress.spent),
+    limit: formatMoney(progress.limit),
   });
   const remainder =
     progress.remaining >= 0
-      ? t('budgets.amountLeft', { amount: formatTaka(progress.remaining) })
-      : t('budgets.amountOver', { amount: formatTaka(toPoisha(-progress.remaining)) });
+      ? t('budgets.amountLeft', { amount: formatMoney(progress.remaining) })
+      : t('budgets.amountOver', { amount: formatMoney(toMinor(-progress.remaining)) });
   const isOverall = progress.scope === OVERALL_SCOPE;
 
   return (

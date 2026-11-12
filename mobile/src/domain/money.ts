@@ -1,75 +1,131 @@
+import {
+  CURRENCIES,
+  CURRENCY_CODES,
+  DEFAULT_CURRENCY,
+  symbolNeedsSpace,
+  type CurrencyCode,
+} from './currency';
+
 /**
- * Money handling for Bangladeshi Taka (BDT).
+ * Money handling.
  *
- * All amounts are stored and calculated as whole poisha (1 Taka = 100 poisha)
- * in safe integers. Never use floating-point values for money: 0.1 + 0.2 !== 0.3.
+ * All amounts are stored and calculated as integer minor units (hundredths:
+ * poisha for BDT, cents for USD) in safe integers. Never use floating-point
+ * values for money: 0.1 + 0.2 !== 0.3.
  */
 
-/** An integer amount in poisha. Create with `toPoisha` or `parseTakaInput`. */
-export type Poisha = number & { readonly __brand: 'Poisha' };
+/** An integer amount in minor units. Create with `toMinor` or `parseAmountInput`. */
+export type MinorAmount = number & { readonly __brand: 'MinorAmount' };
 
-export const POISHA_PER_TAKA = 100;
-export const TAKA_SYMBOL = '৳';
+/** Every supported currency has 100 minor units per major unit. */
+export const MINOR_PER_MAJOR = 100;
 
-/** Largest whole-Taka amount accepted from user input (999,99,99,99,999 Tk). */
-const MAX_TAKA_DIGITS = 13;
+/** Largest whole-unit amount accepted from user input (13 digits). */
+const MAX_MAJOR_DIGITS = 13;
 
 const BANGLA_DIGITS = '০১২৩৪৫৬৭৮৯';
 
-/** Wraps an integer poisha value. Throws if the value is not a safe integer. */
-export function toPoisha(value: number): Poisha {
+// ---------------------------------------------------------------------------
+// Display currency
+// ---------------------------------------------------------------------------
+
+let activeCurrency: CurrencyCode = DEFAULT_CURRENCY;
+
+/**
+ * Sets the currency used by `formatMoney` when none is passed. Set from the
+ * user's profile at app level; the app remounts its screens when it changes.
+ */
+export function setActiveCurrency(code: CurrencyCode): void {
+  activeCurrency = code;
+}
+
+export function getActiveCurrency(): CurrencyCode {
+  return activeCurrency;
+}
+
+/** Symbol of a currency (default: the active one), e.g. "৳". */
+export function currencySymbol(code: CurrencyCode = activeCurrency): string {
+  return CURRENCIES[code].symbol;
+}
+
+// ---------------------------------------------------------------------------
+// Arithmetic
+// ---------------------------------------------------------------------------
+
+/** Wraps an integer minor-unit value. Throws if the value is not a safe integer. */
+export function toMinor(value: number): MinorAmount {
   if (!Number.isSafeInteger(value)) {
-    throw new RangeError(`Poisha amount must be a safe integer, received ${value}`);
+    throw new RangeError(`Money amount must be a safe integer, received ${value}`);
   }
-  return value as Poisha;
+  return value as MinorAmount;
 }
 
 /** Adds amounts exactly. Throws if the total exceeds the safe integer range. */
-export function sumPoisha(amounts: readonly Poisha[]): Poisha {
+export function sumMinor(amounts: readonly MinorAmount[]): MinorAmount {
   let total = 0;
   for (const amount of amounts) {
     total += amount;
   }
-  return toPoisha(total);
+  return toMinor(total);
 }
+
+// ---------------------------------------------------------------------------
+// Parsing user input
+// ---------------------------------------------------------------------------
 
 /** Converts Bangla digits (০–৯) to ASCII digits (0–9). Other characters are unchanged. */
 function normaliseDigits(input: string): string {
   return input.replace(/[০-৯]/g, (digit) => String(BANGLA_DIGITS.indexOf(digit)));
 }
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Any supported symbol or code, plus common written forms (Tk, Rs.). Longest first. */
+const PREFIX_PATTERN = new RegExp(
+  `^(${[
+    ...CURRENCY_CODES,
+    ...CURRENCY_CODES.map((code) => CURRENCIES[code].symbol),
+    'Tk.',
+    'Tk',
+    'Rs.',
+  ]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join('|')})\\s*`,
+  'i',
+);
+
 /**
- * Parses an amount typed by the user into poisha, without floating-point maths.
+ * Parses an amount typed by the user into minor units, without floating-point maths.
  *
- * Accepts: "1250", "1,250.50", "৳ 1,00,000", "Tk 99.5", "১২৫০".
+ * Accepts: "1250", "1,250.50", "৳ 1,00,000", "Tk 99.5", "$12", "১২৫০".
  * Returns `null` for empty, negative, malformed input, more than two decimal
  * places, or amounts too large to store safely.
  */
-export function parseTakaInput(input: string): Poisha | null {
-  const cleaned = normaliseDigits(input)
-    .trim()
-    .replace(/^(৳|tk\.?|bdt)\s*/i, '')
-    .replace(/,/g, '');
+export function parseAmountInput(input: string): MinorAmount | null {
+  const cleaned = normaliseDigits(input).trim().replace(PREFIX_PATTERN, '').replace(/,/g, '');
 
   const match = /^(\d+)(?:\.(\d{0,2}))?$/.exec(cleaned);
   if (!match) {
     return null;
   }
 
-  const [, takaPart, poishaPart = ''] = match;
-  const wholeTaka = takaPart.replace(/^0+(?=\d)/, '');
-  if (wholeTaka.length > MAX_TAKA_DIGITS) {
+  const [, majorPart, minorPart = ''] = match;
+  const whole = majorPart.replace(/^0+(?=\d)/, '');
+  if (whole.length > MAX_MAJOR_DIGITS) {
     return null;
   }
 
-  const poisha = Number(wholeTaka) * POISHA_PER_TAKA + Number(poishaPart.padEnd(2, '0'));
-  return toPoisha(poisha);
+  return toMinor(Number(whole) * MINOR_PER_MAJOR + Number(minorPart.padEnd(2, '0')));
 }
 
-/**
- * Groups a string of digits the South Asian way: the last three digits, then
- * groups of two (lakh, crore). "10000000" → "1,00,00,000".
- */
+// ---------------------------------------------------------------------------
+// Formatting
+// ---------------------------------------------------------------------------
+
+/** "10000000" → "1,00,00,000" (lakh/crore grouping). */
 function groupSouthAsian(digits: string): string {
   if (digits.length <= 3) {
     return digits;
@@ -79,48 +135,76 @@ function groupSouthAsian(digits: string): string {
   return `${rest},${lastThree}`;
 }
 
-/**
- * Short Taka for chart axes, using Bangladeshi units:
- * ৳950, ৳25K (thousand), ৳1.5L (lakh = 1,00,000), ৳1.2Cr (crore = 1,00,00,000).
- * Whole Taka only; full amounts belong in labels and tooltips.
- */
-export function formatTakaCompact(amount: Poisha): string {
-  const taka = Math.abs(amount) / POISHA_PER_TAKA;
-  const sign = amount < 0 ? '-' : '';
-  const units: [number, string][] = [
-    [10_000_000, 'Cr'],
-    [100_000, 'L'],
-    [1_000, 'K'],
-  ];
-  for (const [size, suffix] of units) {
-    if (taka >= size) {
-      const value = Math.round((taka / size) * 10) / 10;
-      return `${sign}${TAKA_SYMBOL}${String(value).replace(/\.0$/, '')}${suffix}`;
-    }
-  }
-  return `${sign}${TAKA_SYMBOL}${Math.round(taka)}`;
+/** "10000000" → "10,000,000". */
+function groupStandard(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-export interface FormatTakaOptions {
-  /** Prefix with ৳. Default: true. */
+function withSymbol(sign: string, symbol: string, number: string): string {
+  return `${sign}${symbol}${symbolNeedsSpace(symbol) ? ' ' : ''}${number}`;
+}
+
+export interface FormatMoneyOptions {
+  /** Defaults to the active currency. */
+  currency?: CurrencyCode;
+  /** Prefix with the currency symbol. Default: true. */
   showSymbol?: boolean;
-  /** 'always' shows .00; 'auto' hides decimals for whole Taka. Default: 'always'. */
+  /** 'always' shows .00; 'auto' hides decimals for whole amounts. Default: 'always'. */
   decimals?: 'always' | 'auto';
 }
 
-/** Formats poisha as Taka with lakh/crore grouping, e.g. 10000050 → "৳1,00,000.50". */
-export function formatTaka(amount: Poisha, options: FormatTakaOptions = {}): string {
-  const { showSymbol = true, decimals = 'always' } = options;
+/**
+ * Formats minor units for display, e.g. BDT 10000050 → "৳1,00,000.50",
+ * USD 10000050 → "$100,000.50", PKR 50000 → "Rs 500.00".
+ */
+export function formatMoney(amount: MinorAmount, options: FormatMoneyOptions = {}): string {
+  const { currency = activeCurrency, showSymbol = true, decimals = 'always' } = options;
+  const info = CURRENCIES[currency];
 
   const absolute = Math.abs(amount);
-  const wholeTaka = Math.floor(absolute / POISHA_PER_TAKA);
-  const remainder = absolute % POISHA_PER_TAKA;
+  const whole = Math.floor(absolute / MINOR_PER_MAJOR);
+  const remainder = absolute % MINOR_PER_MAJOR;
 
-  const grouped = groupSouthAsian(String(wholeTaka));
+  const digits = String(whole);
+  const grouped = info.grouping === 'southAsian' ? groupSouthAsian(digits) : groupStandard(digits);
   const fraction =
     decimals === 'auto' && remainder === 0 ? '' : `.${String(remainder).padStart(2, '0')}`;
 
   const sign = amount < 0 ? '-' : '';
-  const symbol = showSymbol ? TAKA_SYMBOL : '';
-  return `${sign}${symbol}${grouped}${fraction}`;
+  return showSymbol
+    ? withSymbol(sign, info.symbol, `${grouped}${fraction}`)
+    : `${sign}${grouped}${fraction}`;
+}
+
+/**
+ * Short form for chart axes. South Asian currencies use K / L (lakh) / Cr
+ * (crore): ৳25K, ৳1.5L, ৳1.2Cr. Others use K / M / B: $25K, $1.5M.
+ * Whole units only; full amounts belong in labels and tooltips.
+ */
+export function formatMoneyCompact(
+  amount: MinorAmount,
+  currency: CurrencyCode = activeCurrency,
+): string {
+  const info = CURRENCIES[currency];
+  const value = Math.abs(amount) / MINOR_PER_MAJOR;
+  const sign = amount < 0 ? '-' : '';
+  const units: [number, string][] =
+    info.grouping === 'southAsian'
+      ? [
+          [10_000_000, 'Cr'],
+          [100_000, 'L'],
+          [1_000, 'K'],
+        ]
+      : [
+          [1_000_000_000, 'B'],
+          [1_000_000, 'M'],
+          [1_000, 'K'],
+        ];
+  for (const [size, suffix] of units) {
+    if (value >= size) {
+      const scaled = Math.round((value / size) * 10) / 10;
+      return withSymbol(sign, info.symbol, `${String(scaled).replace(/\.0$/, '')}${suffix}`);
+    }
+  }
+  return withSymbol(sign, info.symbol, String(Math.round(value)));
 }

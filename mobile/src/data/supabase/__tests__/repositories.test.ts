@@ -1,5 +1,5 @@
 import type { MonthKey, IsoDate } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 
 import { NotFoundError } from '../../repositories';
 import { createSupabaseBudgetRepository } from '../budgetRepository';
@@ -54,7 +54,7 @@ const row = {
 
 const input = {
   type: 'expense' as const,
-  amount: toPoisha(125050),
+  amount: toMinor(125050),
   categoryId: 'food' as const,
   paymentMethod: 'bkash' as const,
   note: 'Lunch',
@@ -146,7 +146,7 @@ describe('Supabase budget repository', () => {
     const saved = await createSupabaseBudgetRepository(
       () => client,
       async () => 'user-1',
-    ).setLimit('food', '2026-11' as MonthKey, toPoisha(600000));
+    ).setLimit('food', '2026-11' as MonthKey, toMinor(600000));
 
     expect(saved).toEqual({
       scope: 'food',

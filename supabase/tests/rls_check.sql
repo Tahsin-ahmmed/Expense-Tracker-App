@@ -139,6 +139,70 @@ begin
 end $$;
 
 ------------------------------------------------------------------------------
+-- Profiles: own row only
+------------------------------------------------------------------------------
+insert into public.profiles (currency, opening_balance_minor, opening_balance_date)
+values ('USD', 2500000, '2026-11-01');
+
+insert into rls_results
+select 'A creates own profile, owner set automatically', count(*) = 1
+from public.profiles where user_id = 'aaaaaaaa-0000-4000-8000-000000000001';
+
+do $$
+declare
+  ok boolean;
+begin
+  begin
+    update public.profiles set currency = 'XYZ';
+    ok := false;
+  exception when check_violation then ok := true;
+  end;
+  insert into rls_results values ('profile rejects unsupported currency', ok);
+end $$;
+
+select set_config('request.jwt.claims',
+  '{"sub":"bbbbbbbb-0000-4000-8000-000000000002","role":"authenticated"}', true);
+
+insert into rls_results select 'B cannot read A profile', count(*) = 0 from public.profiles;
+
+with changed as (update public.profiles set currency = 'EUR' returning 1)
+insert into rls_results select 'B cannot update A profile', count(*) = 0 from changed;
+
+do $$
+declare
+  ok boolean;
+begin
+  begin
+    insert into public.profiles (user_id) values ('aaaaaaaa-0000-4000-8000-000000000001');
+    ok := false;
+  exception when insufficient_privilege or unique_violation then ok := true;
+  end;
+  insert into rls_results values ('B cannot create a profile for A', ok);
+end $$;
+
+------------------------------------------------------------------------------
+-- delete_my_account: B deletes only B
+------------------------------------------------------------------------------
+insert into public.transactions (type, amount_poisha, category_id, payment_method, occurred_on)
+values ('expense', 500, 'transport', 'cash', '2026-11-02');
+insert into public.profiles (currency) values ('BDT');
+
+select public.delete_my_account();
+
+reset role;
+insert into rls_results
+select 'delete_my_account removed B (user, data, profile)',
+  not exists (select 1 from auth.users where id = 'bbbbbbbb-0000-4000-8000-000000000002')
+  and not exists (select 1 from public.transactions where user_id = 'bbbbbbbb-0000-4000-8000-000000000002')
+  and not exists (select 1 from public.profiles where user_id = 'bbbbbbbb-0000-4000-8000-000000000002');
+
+insert into rls_results
+select 'delete_my_account left A untouched',
+  exists (select 1 from auth.users where id = 'aaaaaaaa-0000-4000-8000-000000000001')
+  and (select count(*) from public.transactions where user_id = 'aaaaaaaa-0000-4000-8000-000000000001') = 1
+  and (select count(*) from public.profiles where user_id = 'aaaaaaaa-0000-4000-8000-000000000001') = 1;
+
+------------------------------------------------------------------------------
 -- Signed-out (anon): no access at all
 ------------------------------------------------------------------------------
 reset role;
@@ -162,6 +226,20 @@ begin
   exception when insufficient_privilege then ok := true;
   end;
   insert into rls_results values ('anon cannot read budgets', ok);
+
+  begin
+    perform count(*) from public.profiles;
+    ok := false;
+  exception when insufficient_privilege then ok := true;
+  end;
+  insert into rls_results values ('anon cannot read profiles', ok);
+
+  begin
+    perform public.delete_my_account();
+    ok := false;
+  exception when insufficient_privilege then ok := true;
+  end;
+  insert into rls_results values ('anon cannot call delete_my_account', ok);
 end $$;
 
 reset role;

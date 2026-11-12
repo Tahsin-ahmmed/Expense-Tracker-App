@@ -1,6 +1,6 @@
 import type { CategoryId } from '@/domain/category';
 import { monthOf, type IsoDate, type MonthKey } from '@/domain/date';
-import { sumPoisha, toPoisha, type Poisha } from '@/domain/money';
+import { sumMinor, toMinor, type MinorAmount } from '@/domain/money';
 import { compareNewestFirst, type Transaction } from '@/domain/transaction';
 
 export const TOP_CATEGORY_LIMIT = 5;
@@ -8,17 +8,17 @@ export const RECENT_TRANSACTION_LIMIT = 5;
 
 export interface CategorySpending {
   categoryId: CategoryId;
-  amount: Poisha;
+  amount: MinorAmount;
   /** Share of this month's expenses, 0–100, rounded to a whole percent. */
   sharePercent: number;
 }
 
 export interface DashboardSummary {
   month: MonthKey;
-  income: Poisha;
-  expense: Poisha;
+  income: MinorAmount;
+  expense: MinorAmount;
   /** income − expense for the month. Can be negative. */
-  balance: Poisha;
+  balance: MinorAmount;
   /** Largest expense categories this month, biggest first. */
   topCategories: CategorySpending[];
   /** Most recent transactions across all months. */
@@ -36,10 +36,10 @@ export function buildDashboardSummary(
   const incomes = thisMonth.filter((tx) => tx.type === 'income').map((tx) => tx.amount);
   const expenses = thisMonth.filter((tx) => tx.type === 'expense');
 
-  const income = sumPoisha(incomes);
-  const expense = sumPoisha(expenses.map((tx) => tx.amount));
+  const income = sumMinor(incomes);
+  const expense = sumMinor(expenses.map((tx) => tx.amount));
 
-  const byCategory = new Map<CategoryId, Poisha[]>();
+  const byCategory = new Map<CategoryId, MinorAmount[]>();
   for (const tx of expenses) {
     const list = byCategory.get(tx.categoryId) ?? [];
     list.push(tx.amount);
@@ -48,7 +48,7 @@ export function buildDashboardSummary(
 
   const topCategories = [...byCategory.entries()]
     .map(([categoryId, amounts]) => {
-      const amount = sumPoisha(amounts);
+      const amount = sumMinor(amounts);
       return {
         categoryId,
         amount,
@@ -64,7 +64,7 @@ export function buildDashboardSummary(
     month,
     income,
     expense,
-    balance: toPoisha(income - expense),
+    balance: toMinor(income - expense),
     topCategories,
     recent,
   };

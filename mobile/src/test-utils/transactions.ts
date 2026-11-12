@@ -1,5 +1,5 @@
 import type { IsoDate } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import type { Transaction } from '@/domain/transaction';
 
 let counter = 0;
@@ -21,7 +21,7 @@ export function makeTransaction(
     note: null,
     createdAt: `2026-11-10T08:00:${String(counter % 60).padStart(2, '0')}.000Z`,
     ...rest,
-    amount: toPoisha(amount),
+    amount: toMinor(amount),
     occurredOn: occurredOn as IsoDate,
   };
 }

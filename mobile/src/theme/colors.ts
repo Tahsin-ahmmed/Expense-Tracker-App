@@ -21,7 +21,9 @@ export const colors = {
   income: '#12805C',
   expense: '#C2410C',
   danger: '#B42318',
+  dangerSoft: '#FDECEC',
   warning: '#B54708',
+  warningSoft: '#FEF3E2',
 } as const;
 
 export type ColorToken = keyof typeof colors;

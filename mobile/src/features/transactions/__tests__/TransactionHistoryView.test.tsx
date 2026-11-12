@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import type { IsoDate, MonthKey } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import { makeTransaction } from '@/test-utils/transactions';
 
 import {
@@ -20,7 +20,7 @@ function props(overrides: Partial<TransactionHistoryViewProps> = {}): Transactio
     onNextMonth: jest.fn(),
     canGoNext: false,
     sections: [],
-    totals: { income: toPoisha(0), expense: toPoisha(0) },
+    totals: { income: toMinor(0), expense: toMinor(0) },
     monthHasTransactions: false,
     today,
     onPressTransaction: jest.fn(),
@@ -43,7 +43,7 @@ describe('TransactionHistoryView', () => {
       <TransactionHistoryView
         {...props({
           sections: groupByDay([lunch, salary]),
-          totals: { income: toPoisha(5000000), expense: toPoisha(25000) },
+          totals: { income: toMinor(5000000), expense: toMinor(25000) },
           monthHasTransactions: true,
         })}
       />,

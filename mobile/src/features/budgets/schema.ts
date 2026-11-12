@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { Poisha } from '@/domain/money';
+import type { MinorAmount } from '@/domain/money';
 import { validateAmountInput } from '@/lib/amountInput';
 
 export interface BudgetFormValues {
@@ -16,7 +16,7 @@ export const budgetFormSchema = z
       ctx.addIssue({ code: 'custom', path: ['amount'], message: result.message });
     }
   })
-  .transform((values): Poisha => {
+  .transform((values): MinorAmount => {
     const result = validateAmountInput(values.amount);
     if (!result.ok) {
       throw new Error('Unreachable: budget form values were not validated');

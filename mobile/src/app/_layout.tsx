@@ -25,6 +25,7 @@ const navigationTheme: Theme = {
 };
 
 const modal = (title: string) => ({ presentation: 'modal' as const, headerShown: true, title });
+const page = (title: string) => ({ headerShown: true, title });
 
 /**
  * Root navigator. Signed-in users only reach the app screens; signed-out
@@ -61,6 +62,8 @@ export default function RootLayout() {
           <Stack.Screen name="add-transaction" options={modal(t('addTransaction.title'))} />
           <Stack.Screen name="edit-transaction/[id]" options={modal(t('editTransaction.title'))} />
           <Stack.Screen name="edit-budget/[scope]" options={modal(t('budgets.edit'))} />
+          <Stack.Screen name="settings/profile" options={page(t('profile.title'))} />
+          <Stack.Screen name="settings/delete-account" options={page(t('deleteAccount.title'))} />
         </Stack.Protected>
 
         <Stack.Protected guard={!signedIn}>

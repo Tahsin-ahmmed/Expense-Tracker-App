@@ -1,6 +1,6 @@
 import type { CategoryId } from './category';
 import type { IsoDate } from './date';
-import type { Poisha } from './money';
+import type { MinorAmount } from './money';
 
 export const TRANSACTION_TYPES = ['expense', 'income'] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
@@ -20,7 +20,7 @@ export const NOTE_MAX_LENGTH = 140;
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: Poisha;
+  amount: MinorAmount;
   categoryId: CategoryId;
   paymentMethod: PaymentMethod;
   note: string | null;

@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui';
 import { isBudgetScope, resolveLimits } from '@/domain/budget';
 import { monthOf } from '@/domain/date';
-import type { Poisha } from '@/domain/money';
+import type { MinorAmount } from '@/domain/money';
 import { BudgetForm } from '@/features/budgets/components/BudgetForm';
 import { scopeLabel } from '@/features/budgets/scopeLabel';
 import { useBudgetsStore } from '@/features/budgets/useBudgetsStore';
@@ -58,7 +58,7 @@ export default function EditBudgetScreen() {
 
   const currentLimit = resolveLimits(entries, month).get(scope) ?? null;
 
-  const handleSave = async (limit: Poisha) => {
+  const handleSave = async (limit: MinorAmount) => {
     await setLimit(scope, month, limit);
     router.back();
   };

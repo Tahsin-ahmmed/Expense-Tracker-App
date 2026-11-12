@@ -1,8 +1,10 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Button, SectionHeader } from '@/components/ui';
+import type { MonthStart } from '@/domain/balance';
 import type { MonthBudgets } from '@/domain/budget';
 import type { IsoDate } from '@/domain/date';
+import type { MinorAmount } from '@/domain/money';
 import type { Transaction, TransactionType } from '@/domain/transaction';
 import { t } from '@/i18n';
 import { spacing } from '@/theme';
@@ -16,11 +18,15 @@ import { RecentTransactions } from './RecentTransactions';
 export interface DashboardViewProps {
   summary: DashboardSummary;
   budgets: MonthBudgets;
+  /** All-time balance; null until an opening balance is set. */
+  currentBalance: MinorAmount | null;
+  monthStart: MonthStart | null;
   today: IsoDate;
   onAdd: (type: TransactionType) => void;
   onPressTransaction?: (transaction: Transaction) => void;
   onSetBudget?: () => void;
   onOpenBudgets?: () => void;
+  onSetBalance?: () => void;
 }
 
 const noop = () => {};
@@ -29,15 +35,26 @@ const noop = () => {};
 export function DashboardView({
   summary,
   budgets,
+  currentBalance,
+  monthStart,
   today,
   onAdd,
   onPressTransaction,
   onSetBudget = noop,
   onOpenBudgets = noop,
+  onSetBalance = noop,
 }: DashboardViewProps) {
   return (
     <View>
-      <BalanceCard balance={summary.balance} income={summary.income} expense={summary.expense} />
+      <BalanceCard
+        currentBalance={currentBalance}
+        month={summary.month}
+        monthStart={monthStart}
+        income={summary.income}
+        expense={summary.expense}
+        today={today}
+        onSetBalance={onSetBalance}
+      />
 
       <View style={styles.actions}>
         <View style={styles.action}>
@@ -57,11 +74,16 @@ export function DashboardView({
         </View>
       </View>
 
+      <SectionHeader title={t('dashboard.budget')} />
+      <BudgetOverview
+        budgets={budgets}
+        today={today}
+        onSetBudget={onSetBudget}
+        onOpenBudgets={onOpenBudgets}
+      />
+
       <SectionHeader title={t('dashboard.spendingByCategory')} />
       <CategoryBreakdown categories={summary.topCategories} />
-
-      <SectionHeader title={t('dashboard.budget')} />
-      <BudgetOverview budgets={budgets} onSetBudget={onSetBudget} onOpenBudgets={onOpenBudgets} />
 
       <SectionHeader title={t('dashboard.recentTransactions')} />
       <RecentTransactions

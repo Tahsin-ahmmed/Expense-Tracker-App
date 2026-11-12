@@ -1,12 +1,15 @@
+import { router } from 'expo-router';
 import { useMemo } from 'react';
 
 import { ErrorState, LoadingState, Screen } from '@/components/ui';
+import { currentBalance, monthStart } from '@/domain/balance';
 import { OVERALL_SCOPE } from '@/domain/budget';
 import { monthOf } from '@/domain/date';
 import { openBudgetsTab, openEditBudget } from '@/features/budgets/navigation';
 import { useMonthBudgets } from '@/features/budgets/useMonthBudgets';
 import { DashboardView } from '@/features/dashboard/components/DashboardView';
 import { buildDashboardSummary } from '@/features/dashboard/summary';
+import { useProfileStore } from '@/features/profile/useProfileStore';
 import { openAddTransaction, openEditTransaction } from '@/features/transactions/navigation';
 import { useTransactionsStore } from '@/features/transactions/useTransactionsStore';
 import { useToday } from '@/hooks/useToday';
@@ -17,13 +20,26 @@ export default function DashboardScreen() {
   const { today, hour } = useToday();
   const month = monthOf(today);
   const transactions = useTransactionsStore((state) => state.transactions);
-  // Loads both transactions and budgets, and reports their combined status.
+  const profile = useProfileStore((state) => state.profile);
+  // Loads transactions, budgets and profile, and reports their combined status.
   const { budgets, status, retry } = useMonthBudgets(month);
 
   const summary = useMemo(() => buildDashboardSummary(transactions, today), [transactions, today]);
+  const balance = useMemo(
+    () => currentBalance(transactions, profile, today),
+    [transactions, profile, today],
+  );
+  const start = useMemo(
+    () => monthStart(transactions, profile, month),
+    [transactions, profile, month],
+  );
+
+  const greeting = profile.displayName
+    ? `${greetingFor(hour)}, ${profile.displayName}`
+    : greetingFor(hour);
 
   return (
-    <Screen title={formatMonthLabel(month)} eyebrow={greetingFor(hour)}>
+    <Screen title={formatMonthLabel(month)} eyebrow={greeting}>
       {status === 'error' ? (
         <ErrorState message={t('dashboard.loadError')} onRetry={retry} />
       ) : status !== 'ready' ? (
@@ -32,11 +48,14 @@ export default function DashboardScreen() {
         <DashboardView
           summary={summary}
           budgets={budgets}
+          currentBalance={balance}
+          monthStart={start}
           today={today}
           onAdd={openAddTransaction}
           onPressTransaction={openEditTransaction}
           onSetBudget={() => openEditBudget(OVERALL_SCOPE)}
           onOpenBudgets={openBudgetsTab}
+          onSetBalance={() => router.push('/settings/profile')}
         />
       )}
     </Screen>

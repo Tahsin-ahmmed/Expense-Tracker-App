@@ -1,6 +1,7 @@
 import type { BudgetEntry, BudgetScope } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import type { Poisha } from '@/domain/money';
+import type { MinorAmount } from '@/domain/money';
+import type { Profile, ProfileUpdate } from '@/domain/profile';
 import type { NewTransaction, Transaction } from '@/domain/transaction';
 
 /**
@@ -25,7 +26,20 @@ export interface BudgetRepository {
    * Sets (or with `null`, removes) a scope's limit from `effectiveFrom` onward.
    * Replaces any entry for the same scope and month.
    */
-  setLimit(scope: BudgetScope, effectiveFrom: MonthKey, limit: Poisha | null): Promise<BudgetEntry>;
+  setLimit(
+    scope: BudgetScope,
+    effectiveFrom: MonthKey,
+    limit: MinorAmount | null,
+  ): Promise<BudgetEntry>;
+}
+
+export interface ProfileRepository {
+  /** The user's profile, or defaults if they have never saved one. */
+  get(): Promise<Profile>;
+  /** Saves the given fields (creating the row if needed) and returns the full profile. */
+  update(update: ProfileUpdate): Promise<Profile>;
+  /** Permanently deletes the signed-in user's account and all their data. */
+  deleteAccount(): Promise<void>;
 }
 
 export class NotFoundError extends Error {

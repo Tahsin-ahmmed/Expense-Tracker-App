@@ -1,5 +1,5 @@
 import type { TransactionRepository } from '@/data';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import type { IsoDate } from '@/domain/date';
 import type { NewTransaction } from '@/domain/transaction';
 import { makeTransaction } from '@/test-utils/transactions';
@@ -29,7 +29,7 @@ async function readyStore(overrides: Partial<TransactionRepository> = {}) {
 
 const newExpense: NewTransaction = {
   type: 'expense',
-  amount: toPoisha(5000),
+  amount: toMinor(5000),
   categoryId: 'transport',
   paymentMethod: 'cash',
   note: null,

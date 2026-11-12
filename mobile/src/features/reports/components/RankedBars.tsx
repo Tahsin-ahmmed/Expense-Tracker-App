@@ -2,14 +2,14 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
-import { formatTaka, type Poisha } from '@/domain/money';
+import { formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
 
 export interface RankedBarItem {
   key: string;
   label: string;
-  amount: Poisha;
+  amount: MinorAmount;
   sharePercent: number;
   /** Identity marker beside the name (e.g. category icon); the bar itself stays one hue. */
   leading?: ReactNode;
@@ -40,7 +40,7 @@ export function RankedBars({ items, emptyText }: RankedBarsProps) {
   return (
     <Card style={styles.list}>
       {items.map((item) => {
-        const amount = formatTaka(item.amount);
+        const amount = formatMoney(item.amount);
         const share = t('reports.shareOfSpending', { percent: item.sharePercent });
         const width = largest > 0 ? (item.amount / largest) * 100 : 0;
         return (

@@ -1,5 +1,5 @@
 import { monthOf, type IsoDate, type MonthKey } from '@/domain/date';
-import { formatTaka, sumPoisha, toPoisha, type Poisha } from '@/domain/money';
+import { formatMoney, sumMinor, toMinor, type MinorAmount } from '@/domain/money';
 import { compareNewestFirst, type Transaction, type TransactionType } from '@/domain/transaction';
 
 export type TypeFilter = 'all' | TransactionType;
@@ -37,7 +37,7 @@ export function filterTransactions(
         return true;
       }
       // Amount is searchable as plain digits, e.g. "1250" or "1250.50".
-      const amount = formatTaka(tx.amount, { showSymbol: false });
+      const amount = formatMoney(tx.amount, { showSymbol: false });
       const haystack = normalise(`${searchText(tx)} ${tx.note ?? ''} ${amount}`);
       return haystack.includes(query);
     })
@@ -45,21 +45,21 @@ export function filterTransactions(
 }
 
 export interface MonthTotals {
-  income: Poisha;
-  expense: Poisha;
+  income: MinorAmount;
+  expense: MinorAmount;
 }
 
 export function totalsFor(transactions: readonly Transaction[]): MonthTotals {
   return {
-    income: sumPoisha(transactions.filter((tx) => tx.type === 'income').map((tx) => tx.amount)),
-    expense: sumPoisha(transactions.filter((tx) => tx.type === 'expense').map((tx) => tx.amount)),
+    income: sumMinor(transactions.filter((tx) => tx.type === 'income').map((tx) => tx.amount)),
+    expense: sumMinor(transactions.filter((tx) => tx.type === 'expense').map((tx) => tx.amount)),
   };
 }
 
 export interface DaySection {
   date: IsoDate;
   /** Income minus expense for the day. */
-  net: Poisha;
+  net: MinorAmount;
   data: Transaction[];
 }
 
@@ -69,11 +69,11 @@ export function groupByDay(transactions: readonly Transaction[]): DaySection[] {
   for (const tx of transactions) {
     let section = sections.at(-1);
     if (!section || section.date !== tx.occurredOn) {
-      section = { date: tx.occurredOn, net: toPoisha(0), data: [] };
+      section = { date: tx.occurredOn, net: toMinor(0), data: [] };
       sections.push(section);
     }
     section.data.push(tx);
-    section.net = toPoisha(section.net + (tx.type === 'income' ? tx.amount : -tx.amount));
+    section.net = toMinor(section.net + (tx.type === 'income' ? tx.amount : -tx.amount));
   }
   return sections;
 }

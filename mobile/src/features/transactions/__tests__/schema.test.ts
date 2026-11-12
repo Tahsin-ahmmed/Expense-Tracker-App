@@ -46,8 +46,8 @@ describe('transaction form schema', () => {
     ['abc', 'Enter a valid amount, e.g. 250 or 1,250.50.'],
     ['-5', 'Enter a valid amount, e.g. 250 or 1,250.50.'],
     ['12.345', 'Enter a valid amount, e.g. 250 or 1,250.50.'],
-    ['0', 'Amount must be more than ৳0.'],
-    ['0.00', 'Amount must be more than ৳0.'],
+    ['0', 'Amount must be more than 0.'],
+    ['0.00', 'Amount must be more than 0.'],
   ])('rejects amount %j', (amount, message) => {
     expect(errorsFor(values({ amount })).amount).toBe(message);
   });

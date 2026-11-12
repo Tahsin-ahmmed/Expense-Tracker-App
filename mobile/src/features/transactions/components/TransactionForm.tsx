@@ -15,7 +15,7 @@ import {
 } from '@/components/ui';
 import { categoriesFor, isCategoryForType, isCategoryId } from '@/domain/category';
 import type { IsoDate } from '@/domain/date';
-import { formatTaka, TAKA_SYMBOL } from '@/domain/money';
+import { currencySymbol, formatMoney } from '@/domain/money';
 import {
   NOTE_MAX_LENGTH,
   PAYMENT_METHODS,
@@ -59,7 +59,7 @@ function toFormValues(
   }
   return {
     type: transaction.type,
-    amount: formatTaka(transaction.amount, { showSymbol: false, decimals: 'auto' }),
+    amount: formatMoney(transaction.amount, { showSymbol: false, decimals: 'auto' }),
     categoryId: transaction.categoryId,
     paymentMethod: transaction.paymentMethod,
     occurredOn: transaction.occurredOn,
@@ -174,7 +174,7 @@ export function TransactionForm({
               error={errors.amount?.message}
               prefix={
                 <AppText variant="title" color="textSecondary">
-                  {TAKA_SYMBOL}
+                  {currencySymbol()}
                 </AppText>
               }
             />

@@ -1,6 +1,6 @@
 import { EXPENSE_CATEGORY_IDS, type ExpenseCategoryId } from './category';
 import { monthOf, type MonthKey } from './date';
-import { sumPoisha, toPoisha, type Poisha } from './money';
+import { sumMinor, toMinor, type MinorAmount } from './money';
 import type { Transaction } from './transaction';
 
 /**
@@ -20,7 +20,7 @@ export interface BudgetEntry {
   scope: BudgetScope;
   effectiveFrom: MonthKey;
   /** `null` removes the budget from `effectiveFrom` onward. */
-  limit: Poisha | null;
+  limit: MinorAmount | null;
   /** ISO 8601 UTC timestamp of the last change. */
   updatedAt: string;
 }
@@ -32,10 +32,10 @@ export type BudgetStatus = 'ok' | 'warning' | 'over';
 
 export interface BudgetProgress {
   scope: BudgetScope;
-  limit: Poisha;
-  spent: Poisha;
+  limit: MinorAmount;
+  spent: MinorAmount;
   /** limit − spent; negative when over budget. */
-  remaining: Poisha;
+  remaining: MinorAmount;
   /** Whole percent of the limit spent (can exceed 100). */
   percent: number;
   status: BudgetStatus;
@@ -49,7 +49,7 @@ export function isBudgetScope(value: unknown): value is BudgetScope {
 export function resolveLimits(
   entries: readonly BudgetEntry[],
   month: MonthKey,
-): Map<BudgetScope, Poisha> {
+): Map<BudgetScope, MinorAmount> {
   const latest = new Map<BudgetScope, BudgetEntry>();
   for (const entry of entries) {
     if (entry.effectiveFrom > month) {
@@ -61,7 +61,7 @@ export function resolveLimits(
     }
   }
 
-  const limits = new Map<BudgetScope, Poisha>();
+  const limits = new Map<BudgetScope, MinorAmount>();
   for (const [scope, entry] of latest) {
     if (entry.limit !== null) {
       limits.set(scope, entry.limit);
@@ -74,9 +74,9 @@ export function resolveLimits(
 export function spendingByScope(
   transactions: readonly Transaction[],
   month: MonthKey,
-): Map<BudgetScope, Poisha> {
-  const amounts = new Map<BudgetScope, Poisha[]>();
-  const add = (scope: BudgetScope, amount: Poisha) => {
+): Map<BudgetScope, MinorAmount> {
+  const amounts = new Map<BudgetScope, MinorAmount[]>();
+  const add = (scope: BudgetScope, amount: MinorAmount) => {
     const list = amounts.get(scope) ?? [];
     list.push(amount);
     amounts.set(scope, list);
@@ -92,20 +92,24 @@ export function spendingByScope(
     }
   }
 
-  const totals = new Map<BudgetScope, Poisha>();
+  const totals = new Map<BudgetScope, MinorAmount>();
   for (const [scope, list] of amounts) {
-    totals.set(scope, sumPoisha(list));
+    totals.set(scope, sumMinor(list));
   }
   return totals;
 }
 
 /** Progress of one budget. `limit` must be positive. */
-export function budgetProgress(scope: BudgetScope, limit: Poisha, spent: Poisha): BudgetProgress {
+export function budgetProgress(
+  scope: BudgetScope,
+  limit: MinorAmount,
+  spent: MinorAmount,
+): BudgetProgress {
   // Integer maths: floor so 79.9% is still "ok" and 100% exactly is not "over".
   const percent = Math.floor((spent * 100) / limit);
   const status: BudgetStatus =
     spent > limit ? 'over' : percent >= WARNING_PERCENT ? 'warning' : 'ok';
-  return { scope, limit, spent, remaining: toPoisha(limit - spent), percent, status };
+  return { scope, limit, spent, remaining: toMinor(limit - spent), percent, status };
 }
 
 export interface MonthBudgets {
@@ -114,9 +118,9 @@ export interface MonthBudgets {
   /** Category budgets, in the standard category order. */
   categories: BudgetProgress[];
   /** Expense per category this month, including categories without a budget. */
-  spent: Map<BudgetScope, Poisha>;
+  spent: Map<BudgetScope, MinorAmount>;
   /** Sum of category limits, to compare against the overall limit. */
-  categoryLimitTotal: Poisha;
+  categoryLimitTotal: MinorAmount;
 }
 
 /** Everything the budget screens need for one month. */
@@ -127,11 +131,11 @@ export function buildMonthBudgets(
 ): MonthBudgets {
   const limits = resolveLimits(entries, month);
   const spent = spendingByScope(transactions, month);
-  const spentFor = (scope: BudgetScope) => spent.get(scope) ?? toPoisha(0);
+  const spentFor = (scope: BudgetScope) => spent.get(scope) ?? toMinor(0);
 
   const overallLimit = limits.get(OVERALL_SCOPE);
   const categories: BudgetProgress[] = [];
-  const categoryLimits: Poisha[] = [];
+  const categoryLimits: MinorAmount[] = [];
   for (const categoryId of EXPENSE_CATEGORY_IDS) {
     const limit = limits.get(categoryId);
     if (limit !== undefined) {
@@ -147,6 +151,6 @@ export function buildMonthBudgets(
       : null,
     categories,
     spent,
-    categoryLimitTotal: sumPoisha(categoryLimits),
+    categoryLimitTotal: sumMinor(categoryLimits),
   };
 }

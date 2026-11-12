@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          currency: string
+          display_name: string | null
+          opening_balance_date: string | null
+          opening_balance_minor: number
+          theme: string
+          updated_at: string
+          user_id: string
+          week_starts_on: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          display_name?: string | null
+          opening_balance_date?: string | null
+          opening_balance_minor?: number
+          theme?: string
+          updated_at?: string
+          user_id?: string
+          week_starts_on?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          display_name?: string | null
+          opening_balance_date?: string | null
+          opening_balance_minor?: number
+          theme?: string
+          updated_at?: string
+          user_id?: string
+          week_starts_on?: number
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_poisha: number
@@ -85,7 +121,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_my_account: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

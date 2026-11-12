@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card, EmptyState, SectionHeader } from '@/components/ui';
 import type { MonthKey } from '@/domain/date';
-import { formatTaka } from '@/domain/money';
+import { formatMoney } from '@/domain/money';
 import { BudgetCard } from '@/features/budgets/components/BudgetCard';
 import {
   CATEGORY_APPEARANCE,
@@ -79,21 +79,21 @@ export function ReportView({
         <StatTile
           testID="tile-income"
           label={t('reports.income')}
-          value={formatTaka(totals.income)}
+          value={formatMoney(totals.income)}
           delta={income.text}
           deltaTone={income.tone}
         />
         <StatTile
           testID="tile-expense"
           label={t('reports.expense')}
-          value={formatTaka(totals.expense)}
+          value={formatMoney(totals.expense)}
           delta={expense.text}
           deltaTone={expense.tone}
         />
         <StatTile
           testID="tile-net"
           label={t('reports.net')}
-          value={formatTaka(totals.net)}
+          value={formatMoney(totals.net)}
           deltaTone={totals.net < 0 ? 'bad' : 'neutral'}
         />
         <StatTile
@@ -117,13 +117,13 @@ export function ReportView({
           <Card style={styles.highlights}>
             <Highlight
               label={t('reports.dailyAverage')}
-              value={formatTaka(report.dailyAverageExpense)}
+              value={formatMoney(report.dailyAverageExpense)}
             />
             <Highlight
               label={t('reports.largestExpense')}
               value={
                 report.largestExpense
-                  ? `${formatTaka(report.largestExpense.amount)} · ${t(
+                  ? `${formatMoney(report.largestExpense.amount)} · ${t(
                       CATEGORY_APPEARANCE[report.largestExpense.categoryId].labelKey,
                     )}`
                   : t('reports.none')

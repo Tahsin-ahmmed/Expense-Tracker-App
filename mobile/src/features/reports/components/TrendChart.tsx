@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Card, TextButton } from '@/components/ui';
 import type { MonthKey } from '@/domain/date';
-import { formatTaka, formatTakaCompact, toPoisha, type Poisha } from '@/domain/money';
+import { formatMoney, formatMoneyCompact, toMinor, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
 import { colors, radius, spacing } from '@/theme';
@@ -28,15 +28,15 @@ const SERIES = [
 ] as const;
 
 /** Rounds up to a clean axis maximum: 1, 2, 2.5 or 5 × 10ⁿ Taka, split in two. */
-export function niceAxisMax(maxPoisha: number): Poisha {
+export function niceAxisMax(maxPoisha: number): MinorAmount {
   if (maxPoisha <= 0) {
-    return toPoisha(0);
+    return toMinor(0);
   }
   const taka = maxPoisha / 100;
   const half = taka / 2;
   const magnitude = 10 ** Math.floor(Math.log10(half));
   const step = [1, 2, 2.5, 5, 10].map((m) => m * magnitude).find((s) => s >= half) ?? half;
-  return toPoisha(Math.round(step * 2 * 100));
+  return toMinor(Math.round(step * 2 * 100));
 }
 
 function shortMonth(month: MonthKey): string {
@@ -51,10 +51,10 @@ function shortMonth(month: MonthKey): string {
 export function TrendChart({ data, selectedMonth, onSelectMonth }: TrendChartProps) {
   const [showTable, setShowTable] = useState(false);
   const axisMax = niceAxisMax(Math.max(0, ...data.flatMap((d) => [d.income, d.expense])));
-  const ticks = axisMax > 0 ? [axisMax, toPoisha(axisMax / 2), toPoisha(0)] : [toPoisha(0)];
+  const ticks = axisMax > 0 ? [axisMax, toMinor(axisMax / 2), toMinor(0)] : [toMinor(0)];
   const selected = data.find((d) => d.month === selectedMonth);
 
-  const heightFor = (amount: Poisha) => {
+  const heightFor = (amount: MinorAmount) => {
     if (axisMax === 0 || amount === 0) {
       return 0;
     }
@@ -81,7 +81,7 @@ export function TrendChart({ data, selectedMonth, onSelectMonth }: TrendChartPro
         <View style={styles.axis}>
           {ticks.map((tick) => (
             <AppText key={tick} variant="caption" color="textMuted" style={styles.tickLabel}>
-              {formatTakaCompact(tick)}
+              {formatMoneyCompact(tick)}
             </AppText>
           ))}
         </View>
@@ -98,8 +98,8 @@ export function TrendChart({ data, selectedMonth, onSelectMonth }: TrendChartPro
               const isSelected = d.month === selectedMonth;
               const label = t('reports.trendMonth', {
                 month: formatMonthLabel(d.month),
-                income: formatTaka(d.income),
-                expense: formatTaka(d.expense),
+                income: formatMoney(d.income),
+                expense: formatMoney(d.expense),
               });
               return (
                 <Pressable
@@ -148,7 +148,7 @@ export function TrendChart({ data, selectedMonth, onSelectMonth }: TrendChartPro
             <View key={series.key} style={styles.legendItem}>
               <View style={[styles.swatch, { backgroundColor: series.color }]} />
               <AppText variant="caption" color="textSecondary">
-                {`${t(series.labelKey)} ${formatTaka(selected[series.key])}`}
+                {`${t(series.labelKey)} ${formatMoney(selected[series.key])}`}
               </AppText>
             </View>
           ))}
@@ -184,7 +184,7 @@ export function TrendChart({ data, selectedMonth, onSelectMonth }: TrendChartPro
               </AppText>
               {[d.income, d.expense, d.net].map((value, index) => (
                 <AppText key={index} variant="caption" style={styles.tableCell}>
-                  {formatTaka(value, { decimals: 'auto' })}
+                  {formatMoney(value, { decimals: 'auto' })}
                 </AppText>
               ))}
             </View>

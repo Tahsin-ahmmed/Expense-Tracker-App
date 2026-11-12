@@ -1,8 +1,14 @@
 import { getSupabase } from './supabase/client';
 import { createSupabaseBudgetRepository } from './supabase/budgetRepository';
+import { createSupabaseProfileRepository } from './supabase/profileRepository';
 import { createSupabaseTransactionRepository } from './supabase/transactionRepository';
 
-export { NotFoundError, type BudgetRepository, type TransactionRepository } from './repositories';
+export {
+  NotFoundError,
+  type BudgetRepository,
+  type ProfileRepository,
+  type TransactionRepository,
+} from './repositories';
 
 /** The signed-in user's id. Throws if nobody is signed in. */
 async function currentUserId(): Promise<string> {
@@ -17,3 +23,4 @@ async function currentUserId(): Promise<string> {
 /** App-wide repository instances backed by Supabase. */
 export const transactionRepository = createSupabaseTransactionRepository(getSupabase);
 export const budgetRepository = createSupabaseBudgetRepository(getSupabase, currentUserId);
+export const profileRepository = createSupabaseProfileRepository(getSupabase, currentUserId);

@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { ErrorState, IconButton, LoadingState, Screen } from '@/components/ui';
+import { monthStart } from '@/domain/balance';
 import { addMonths, monthOf, type MonthKey } from '@/domain/date';
+import { useProfileStore } from '@/features/profile/useProfileStore';
 import {
   filterTransactions,
   groupByDay,
@@ -12,6 +14,7 @@ import { TransactionHistoryView } from '@/features/transactions/components/Trans
 import { openAddTransaction, openEditTransaction } from '@/features/transactions/navigation';
 import { transactionSearchText } from '@/features/transactions/searchText';
 import { useTransactionsStore } from '@/features/transactions/useTransactionsStore';
+import { useAppData } from '@/hooks/useAppData';
 import { useToday } from '@/hooks/useToday';
 import { t } from '@/i18n';
 
@@ -19,20 +22,14 @@ export default function TransactionsScreen() {
   const { today } = useToday();
   const currentMonth = monthOf(today);
   const transactions = useTransactionsStore((state) => state.transactions);
-  const status = useTransactionsStore((state) => state.status);
-  const load = useTransactionsStore((state) => state.load);
+  const profile = useProfileStore((state) => state.profile);
+  const { status, retry } = useAppData();
 
   const [filter, setFilter] = useState<HistoryFilter>({
     month: currentMonth,
     type: 'all',
     query: '',
   });
-
-  useEffect(() => {
-    if (status === 'idle') {
-      void load();
-    }
-  }, [status, load]);
 
   const monthTransactions = useMemo(
     () =>
@@ -49,6 +46,10 @@ export default function TransactionsScreen() {
   );
   const sections = useMemo(() => groupByDay(visible), [visible]);
   const totals = useMemo(() => totalsFor(monthTransactions), [monthTransactions]);
+  const start = useMemo(
+    () => monthStart(transactions, profile, filter.month),
+    [transactions, profile, filter.month],
+  );
 
   const changeMonth = (month: MonthKey) => setFilter((current) => ({ ...current, month }));
 
@@ -65,7 +66,7 @@ export default function TransactionsScreen() {
         />
       }>
       {status === 'error' ? (
-        <ErrorState message={t('transactions.loadError')} onRetry={() => void load()} />
+        <ErrorState message={t('transactions.loadError')} onRetry={retry} />
       ) : status !== 'ready' ? (
         <LoadingState />
       ) : (
@@ -78,6 +79,7 @@ export default function TransactionsScreen() {
           sections={sections}
           totals={totals}
           monthHasTransactions={monthTransactions.length > 0}
+          monthStart={start}
           today={today}
           onPressTransaction={openEditTransaction}
         />

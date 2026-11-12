@@ -1,6 +1,6 @@
 import type { BudgetEntry } from '@/domain/budget';
 import { daysInMonth, type IsoDate, type MonthKey } from '@/domain/date';
-import { formatTakaCompact, toPoisha } from '@/domain/money';
+import { formatMoneyCompact, toMinor } from '@/domain/money';
 import { makeTransaction } from '@/test-utils/transactions';
 
 import { niceAxisMax } from '../components/TrendChart';
@@ -110,7 +110,7 @@ describe('buildMonthReport', () => {
 
   it('includes budget results for that month', () => {
     const entries: BudgetEntry[] = [
-      { scope: 'food', effectiveFrom: nov, limit: toPoisha(50000), updatedAt: 'x' },
+      { scope: 'food', effectiveFrom: nov, limit: toMinor(50000), updatedAt: 'x' },
     ];
     const withBudgets = buildMonthReport(transactions, entries, nov, today);
     expect(withBudgets.budgets.categories[0]).toMatchObject({ scope: 'food', status: 'over' });
@@ -164,7 +164,7 @@ describe('daysInMonth', () => {
   });
 });
 
-describe('formatTakaCompact', () => {
+describe('formatMoneyCompact', () => {
   it.each([
     [0, '৳0'],
     [95000, '৳950'],
@@ -175,7 +175,7 @@ describe('formatTakaCompact', () => {
     [1200000000, '৳1.2Cr'],
     [-2500000, '-৳25K'],
   ])('%i poisha → %s', (amount, expected) => {
-    expect(formatTakaCompact(toPoisha(amount))).toBe(expected);
+    expect(formatMoneyCompact(toMinor(amount))).toBe(expected);
   });
 });
 

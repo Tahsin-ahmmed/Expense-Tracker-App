@@ -1,6 +1,6 @@
 import { isBudgetScope, type BudgetEntry } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 
 import type { BudgetRepository } from '../repositories';
 import type { AppSupabaseClient } from './client';
@@ -36,7 +36,7 @@ function fromRow(row: BudgetRow): BudgetEntry | null {
   return {
     scope: row.scope,
     effectiveFrom: month,
-    limit: row.limit_poisha === null ? null : toPoisha(row.limit_poisha),
+    limit: row.limit_poisha === null ? null : toMinor(row.limit_poisha),
     updatedAt: row.updated_at,
   };
 }

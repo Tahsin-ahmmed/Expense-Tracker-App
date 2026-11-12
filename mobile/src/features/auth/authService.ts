@@ -78,7 +78,8 @@ export interface AuthService {
   getSession(): Promise<Session | null>;
   signIn(identifier: Identifier, pin: string): Promise<void>;
   signUp(identifier: Identifier, pin: string): Promise<void>;
-  signOut(): Promise<void>;
+  /** `local` clears only this device (used after the account is deleted on the server). */
+  signOut(scope?: 'global' | 'local'): Promise<void>;
   /** Emails a PIN reset link that opens `redirectTo` in the app. */
   requestPinReset(email: string, redirectTo: string): Promise<void>;
   /** Signs in using the `code` from a reset link (PKCE). */
@@ -125,7 +126,7 @@ export function createAuthService(getClient: () => SupabaseClient): AuthService 
       }
     },
 
-    signOut: () => run(() => getClient().auth.signOut()),
+    signOut: (scope = 'global') => run(() => getClient().auth.signOut({ scope })),
 
     requestPinReset: (email, redirectTo) =>
       run(() => getClient().auth.resetPasswordForEmail(email, { redirectTo })),

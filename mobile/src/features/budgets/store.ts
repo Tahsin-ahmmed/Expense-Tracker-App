@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import type { BudgetRepository } from '@/data/repositories';
 import type { BudgetEntry, BudgetScope } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import type { Poisha } from '@/domain/money';
+import type { MinorAmount } from '@/domain/money';
 import type { LoadStatus } from '@/lib/loadStatus';
 
 export interface BudgetsState {
@@ -11,7 +11,7 @@ export interface BudgetsState {
   status: LoadStatus;
   load: () => Promise<void>;
   /** Sets a limit from `month` onward; `null` removes it. Rejects if saving fails. */
-  setLimit: (scope: BudgetScope, month: MonthKey, limit: Poisha | null) => Promise<void>;
+  setLimit: (scope: BudgetScope, month: MonthKey, limit: MinorAmount | null) => Promise<void>;
   /** Clears all data from memory (on sign-out or account switch). */
   reset: () => void;
 }

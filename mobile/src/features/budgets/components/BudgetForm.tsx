@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, Button, TextField } from '@/components/ui';
 import type { MonthKey } from '@/domain/date';
-import { formatTaka, TAKA_SYMBOL, type Poisha } from '@/domain/money';
+import { currencySymbol, formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
 import { colors, spacing } from '@/theme';
@@ -15,11 +15,11 @@ import { budgetFormSchema, type BudgetFormValues } from '../schema';
 
 export interface BudgetFormProps {
   /** Limit currently in force, or null if none. */
-  currentLimit: Poisha | null;
+  currentLimit: MinorAmount | null;
   /** Month from which the change applies. */
   month: MonthKey;
   /** Throw to show a save error. */
-  onSave: (limit: Poisha) => Promise<void>;
+  onSave: (limit: MinorAmount) => Promise<void>;
   /** Throw to show a save error. Only offered when a limit exists. */
   onRemove: () => Promise<void>;
 }
@@ -34,13 +34,13 @@ export function BudgetForm({ currentLimit, month, onSave, onRemove }: BudgetForm
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<BudgetFormValues, unknown, Poisha>({
+  } = useForm<BudgetFormValues, unknown, MinorAmount>({
     resolver: zodResolver(budgetFormSchema),
     defaultValues: {
       amount:
         currentLimit === null
           ? ''
-          : formatTaka(currentLimit, { showSymbol: false, decimals: 'auto' }),
+          : formatMoney(currentLimit, { showSymbol: false, decimals: 'auto' }),
     },
   });
 
@@ -96,7 +96,7 @@ export function BudgetForm({ currentLimit, month, onSave, onRemove }: BudgetForm
               error={errors.amount?.message}
               prefix={
                 <AppText variant="title" color="textSecondary">
-                  {TAKA_SYMBOL}
+                  {currencySymbol()}
                 </AppText>
               }
             />

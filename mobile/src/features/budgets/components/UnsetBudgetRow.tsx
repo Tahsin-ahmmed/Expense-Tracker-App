@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import type { ExpenseCategoryId } from '@/domain/category';
-import { formatTaka, type Poisha } from '@/domain/money';
+import { formatMoney, type MinorAmount } from '@/domain/money';
 import { CategoryBadge } from '@/features/transactions/components/CategoryBadge';
 import { t } from '@/i18n';
 import { spacing } from '@/theme';
@@ -11,14 +11,14 @@ import { scopeLabel } from '../scopeLabel';
 
 export interface UnsetBudgetRowProps {
   categoryId: ExpenseCategoryId;
-  spent: Poisha;
+  spent: MinorAmount;
   onPress: () => void;
 }
 
 /** A category with no budget yet: shows this month's spending and a "Set budget" action. */
 export function UnsetBudgetRow({ categoryId, spent, onPress }: UnsetBudgetRowProps) {
   const name = scopeLabel(categoryId);
-  const spentText = t('budgets.spentThisMonth', { amount: formatTaka(spent) });
+  const spentText = t('budgets.spentThisMonth', { amount: formatMoney(spent) });
 
   return (
     <Pressable

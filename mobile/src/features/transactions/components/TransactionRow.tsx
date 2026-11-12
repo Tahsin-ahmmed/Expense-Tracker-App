@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AmountText, AppText } from '@/components/ui';
 import type { IsoDate } from '@/domain/date';
-import { formatTaka } from '@/domain/money';
+import { formatMoney } from '@/domain/money';
 import type { Transaction } from '@/domain/transaction';
 import { t } from '@/i18n';
 import { formatDateLabel } from '@/i18n/format';
@@ -32,7 +32,7 @@ export function TransactionRow({
   const date = formatDateLabel(transaction.occurredOn, today);
   const detail = transaction.note ? `${transaction.note} · ${paymentMethod}` : paymentMethod;
   const typeLabel = t(`transactionType.${transaction.type}`);
-  const label = `${typeLabel}, ${category}, ${formatTaka(transaction.amount)}, ${date}, ${detail}`;
+  const label = `${typeLabel}, ${category}, ${formatMoney(transaction.amount)}, ${date}, ${detail}`;
 
   const content = (
     <>

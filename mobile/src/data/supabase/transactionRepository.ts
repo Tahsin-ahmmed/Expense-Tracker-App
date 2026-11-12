@@ -1,6 +1,6 @@
 import { isCategoryId } from '@/domain/category';
 import { isIsoDate } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import {
   isPaymentMethod,
   isTransactionType,
@@ -44,7 +44,7 @@ function fromRow(
   return {
     id: row.id,
     type: row.type,
-    amount: toPoisha(row.amount_poisha),
+    amount: toMinor(row.amount_poisha),
     categoryId: row.category_id,
     paymentMethod: row.payment_method,
     note: row.note,

@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 
 import { buildMonthBudgets, type BudgetEntry } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 import { makeTransaction } from '@/test-utils/transactions';
 
 import { BudgetForm } from '../components/BudgetForm';
@@ -12,7 +12,7 @@ import { BudgetsView } from '../components/BudgetsView';
 const nov = '2026-11' as MonthKey;
 
 function budget(scope: BudgetEntry['scope'], limit: number): BudgetEntry {
-  return { scope, effectiveFrom: nov, limit: toPoisha(limit), updatedAt: 'x' };
+  return { scope, effectiveFrom: nov, limit: toMinor(limit), updatedAt: 'x' };
 }
 
 describe('BudgetsView', () => {
@@ -90,7 +90,7 @@ describe('BudgetForm', () => {
     const onRemove = jest.fn().mockResolvedValue(undefined);
     await render(
       <BudgetForm
-        currentLimit={toPoisha(2000050)}
+        currentLimit={toMinor(2000050)}
         month={nov}
         onSave={jest.fn()}
         onRemove={onRemove}

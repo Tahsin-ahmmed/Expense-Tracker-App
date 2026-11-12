@@ -8,20 +8,20 @@ import {
   type IsoDate,
   type MonthKey,
 } from '@/domain/date';
-import { sumPoisha, toPoisha, type Poisha } from '@/domain/money';
+import { sumMinor, toMinor, type MinorAmount } from '@/domain/money';
 import type { PaymentMethod, Transaction } from '@/domain/transaction';
 
 export interface MonthTotals {
   month: MonthKey;
-  income: Poisha;
-  expense: Poisha;
+  income: MinorAmount;
+  expense: MinorAmount;
   /** income − expense; negative when spending exceeded income. */
-  net: Poisha;
+  net: MinorAmount;
 }
 
 export interface RankedAmount<K extends string> {
   key: K;
-  amount: Poisha;
+  amount: MinorAmount;
   /** Share of the month's expense, whole percent. */
   sharePercent: number;
 }
@@ -35,7 +35,7 @@ export interface MonthReport {
   /** Share of income kept (net / income), whole percent; null without income. */
   savingsRatePercent: number | null;
   /** Expense per day: whole month for past months, days so far for the current one. */
-  dailyAverageExpense: Poisha;
+  dailyAverageExpense: MinorAmount;
   largestExpense: Transaction | null;
   transactionCount: number;
   categories: RankedAmount<CategoryId>[];
@@ -50,9 +50,9 @@ function inMonth(transactions: readonly Transaction[], month: MonthKey): Transac
 /** Income, expense and net for one month. */
 export function monthTotals(transactions: readonly Transaction[], month: MonthKey): MonthTotals {
   const items = inMonth(transactions, month);
-  const income = sumPoisha(items.filter((tx) => tx.type === 'income').map((tx) => tx.amount));
-  const expense = sumPoisha(items.filter((tx) => tx.type === 'expense').map((tx) => tx.amount));
-  return { month, income, expense, net: toPoisha(income - expense) };
+  const income = sumMinor(items.filter((tx) => tx.type === 'income').map((tx) => tx.amount));
+  const expense = sumMinor(items.filter((tx) => tx.type === 'expense').map((tx) => tx.amount));
+  return { month, income, expense, net: toMinor(income - expense) };
 }
 
 function percentChange(current: number, previous: number): number | null {
@@ -63,16 +63,16 @@ function percentChange(current: number, previous: number): number | null {
 function rankExpenses<K extends string>(
   expenses: readonly Transaction[],
   keyOf: (tx: Transaction) => K,
-  total: Poisha,
+  total: MinorAmount,
 ): RankedAmount<K>[] {
-  const groups = new Map<K, Poisha[]>();
+  const groups = new Map<K, MinorAmount[]>();
   for (const tx of expenses) {
     const key = keyOf(tx);
     groups.set(key, [...(groups.get(key) ?? []), tx.amount]);
   }
   return [...groups.entries()]
     .map(([key, amounts]) => {
-      const amount = sumPoisha(amounts);
+      const amount = sumMinor(amounts);
       return {
         key,
         amount,
@@ -116,7 +116,7 @@ export function buildMonthReport(
     incomeChangePercent: percentChange(totals.income, previous.income),
     expenseChangePercent: percentChange(totals.expense, previous.expense),
     savingsRatePercent: totals.income > 0 ? Math.round((totals.net * 100) / totals.income) : null,
-    dailyAverageExpense: toPoisha(days > 0 ? Math.round(totals.expense / days) : 0),
+    dailyAverageExpense: toMinor(days > 0 ? Math.round(totals.expense / days) : 0),
     largestExpense,
     transactionCount: items.length,
     categories: rankExpenses(expenses, (tx) => tx.categoryId, totals.expense),

@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useDisplayCurrency } from '@/lib/displayCurrency';
 import { colors, spacing } from '@/theme';
 
 import { AppText } from './AppText';
@@ -23,6 +24,10 @@ export interface ScreenProps {
 
 /** Standard page container: safe area, background colour, title and padding. */
 export function Screen({ title, eyebrow, action, children, scrollable = true }: ScreenProps) {
+  // Remount the content when the display currency changes so every amount updates.
+  const currency = useDisplayCurrency((state) => state.currency);
+  const content = <Fragment key={currency}>{children}</Fragment>;
+
   const header = (
     <View style={styles.header}>
       <View style={styles.titles}>
@@ -44,12 +49,12 @@ export function Screen({ title, eyebrow, action, children, scrollable = true }: 
       {scrollable ? (
         <ScrollView contentContainerStyle={styles.content}>
           {header}
-          {children}
+          {content}
         </ScrollView>
       ) : (
         <View style={[styles.content, styles.fill]}>
           {header}
-          {children}
+          {content}
         </View>
       )}
     </SafeAreaView>

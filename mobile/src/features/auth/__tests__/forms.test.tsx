@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 
-import { SettingsView } from '@/features/settings/components/SettingsView';
+import { DEFAULT_PROFILE } from '@/domain/profile';
+import { SettingsView, type SettingsViewProps } from '@/features/settings/components/SettingsView';
 
 import { AuthFailure } from '../authService';
 import { ForgotPinForm } from '../components/ForgotPinForm';
@@ -127,18 +128,59 @@ describe('NewPinForm', () => {
 describe('SettingsView', () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it('shows the phone in local format and logs out after confirmation', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const onLogOut = jest.fn().mockResolvedValue(undefined);
-    await render(
+  function renderSettings(overrides: Partial<SettingsViewProps> = {}) {
+    return render(
       <SettingsView
         user={{ id: 'u', email: null, phone: '8801712345678' }}
+        profile={DEFAULT_PROFILE}
+        appVersion="1.0.0"
+        onOpenProfile={jest.fn()}
         onChangePin={jest.fn()}
-        onLogOut={onLogOut}
+        onExport={jest.fn().mockResolvedValue(undefined)}
+        onDeleteAccount={jest.fn()}
+        onLogOut={jest.fn().mockResolvedValue(undefined)}
+        {...overrides}
       />,
     );
+  }
 
+  it('shows the phone in local format, currency and version', async () => {
+    await renderSettings();
+
+    expect(screen.getByTestId('account-name')).toHaveTextContent('01712-345678');
+    expect(screen.getByTestId('row-currency')).toHaveTextContent('CurrencyBDT (৳)');
+    expect(screen.getByTestId('row-opening-balance')).toHaveTextContent(/Not set/);
+    expect(screen.getByText('1.0.0')).toBeOnTheScreen();
+  });
+
+  it('shows the name when set, with the sign-in identity underneath', async () => {
+    await renderSettings({ profile: { ...DEFAULT_PROFILE, displayName: 'Rahim' } });
+
+    expect(screen.getByTestId('account-name')).toHaveTextContent('Rahim');
     expect(screen.getByTestId('signed-in-as')).toHaveTextContent('01712-345678');
+  });
+
+  it('opens profile, delete account and export', async () => {
+    const onOpenProfile = jest.fn();
+    const onDeleteAccount = jest.fn();
+    const onExport = jest
+      .fn()
+      .mockRejectedValue(new Error('There are no transactions to export yet.'));
+    await renderSettings({ onOpenProfile, onDeleteAccount, onExport });
+
+    await fireEvent.press(screen.getByTestId('open-profile'));
+    await fireEvent.press(screen.getByTestId('delete-account'));
+    await fireEvent.press(screen.getByTestId('export-csv'));
+
+    expect(onOpenProfile).toHaveBeenCalled();
+    expect(onDeleteAccount).toHaveBeenCalled();
+    expect(await screen.findByText('There are no transactions to export yet.')).toBeOnTheScreen();
+  });
+
+  it('logs out after confirmation', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const onLogOut = jest.fn().mockResolvedValue(undefined);
+    await renderSettings({ onLogOut });
 
     await fireEvent.press(screen.getByTestId('log-out'));
     expect(onLogOut).not.toHaveBeenCalled();

@@ -1,20 +1,20 @@
-import { formatTaka, parseTakaInput, toPoisha } from '../money';
+import { formatMoney, parseAmountInput, toMinor } from '../money';
 
-describe('toPoisha', () => {
+describe('toMinor', () => {
   it('accepts safe integers', () => {
-    expect(toPoisha(125050)).toBe(125050);
-    expect(toPoisha(0)).toBe(0);
-    expect(toPoisha(-500)).toBe(-500);
+    expect(toMinor(125050)).toBe(125050);
+    expect(toMinor(0)).toBe(0);
+    expect(toMinor(-500)).toBe(-500);
   });
 
   it('rejects fractional and unsafe values', () => {
-    expect(() => toPoisha(10.5)).toThrow(RangeError);
-    expect(() => toPoisha(Number.MAX_SAFE_INTEGER + 1)).toThrow(RangeError);
-    expect(() => toPoisha(Number.NaN)).toThrow(RangeError);
+    expect(() => toMinor(10.5)).toThrow(RangeError);
+    expect(() => toMinor(Number.MAX_SAFE_INTEGER + 1)).toThrow(RangeError);
+    expect(() => toMinor(Number.NaN)).toThrow(RangeError);
   });
 });
 
-describe('parseTakaInput', () => {
+describe('parseAmountInput', () => {
   it.each([
     ['1250', 125000],
     ['1250.5', 125050],
@@ -32,29 +32,29 @@ describe('parseTakaInput', () => {
     ['  42  ', 4200],
     ['১২৫০.৫০', 125050],
   ])('parses %j as %i poisha', (input, expected) => {
-    expect(parseTakaInput(input)).toBe(expected);
+    expect(parseAmountInput(input)).toBe(expected);
   });
 
   it('avoids floating-point rounding errors', () => {
     // 0.29 * 100 === 28.999999999999996 in floating point.
-    expect(parseTakaInput('0.29')).toBe(29);
-    expect(parseTakaInput('1.15')).toBe(115);
+    expect(parseAmountInput('0.29')).toBe(29);
+    expect(parseAmountInput('1.15')).toBe(115);
   });
 
   it.each(['', '   ', 'abc', '-50', '12.345', '1.2.3', '.5', '12a', '৳', '1e5'])(
     'rejects %j',
     (input) => {
-      expect(parseTakaInput(input)).toBeNull();
+      expect(parseAmountInput(input)).toBeNull();
     },
   );
 
   it('rejects amounts too large to store safely', () => {
-    expect(parseTakaInput('99999999999999')).toBeNull();
-    expect(parseTakaInput('9999999999999')).toBe(999999999999900);
+    expect(parseAmountInput('99999999999999')).toBeNull();
+    expect(parseAmountInput('9999999999999')).toBe(999999999999900);
   });
 });
 
-describe('formatTaka', () => {
+describe('formatMoney', () => {
   it.each([
     [0, '৳0.00'],
     [5, '৳0.05'],
@@ -64,25 +64,25 @@ describe('formatTaka', () => {
     [99900, '৳999.00'],
     [100000, '৳1,000.00'],
   ])('formats %i poisha as %s', (amount, expected) => {
-    expect(formatTaka(toPoisha(amount))).toBe(expected);
+    expect(formatMoney(toMinor(amount))).toBe(expected);
   });
 
   it('formats negative amounts with a leading minus', () => {
-    expect(formatTaka(toPoisha(-125050))).toBe('-৳1,250.50');
+    expect(formatMoney(toMinor(-125050))).toBe('-৳1,250.50');
   });
 
   it('can hide the symbol', () => {
-    expect(formatTaka(toPoisha(125050), { showSymbol: false })).toBe('1,250.50');
+    expect(formatMoney(toMinor(125050), { showSymbol: false })).toBe('1,250.50');
   });
 
   it('hides decimals for whole Taka in auto mode only', () => {
-    expect(formatTaka(toPoisha(10000000), { decimals: 'auto' })).toBe('৳1,00,000');
-    expect(formatTaka(toPoisha(125050), { decimals: 'auto' })).toBe('৳1,250.50');
+    expect(formatMoney(toMinor(10000000), { decimals: 'auto' })).toBe('৳1,00,000');
+    expect(formatMoney(toMinor(125050), { decimals: 'auto' })).toBe('৳1,250.50');
   });
 
-  it('round-trips with parseTakaInput', () => {
-    const parsed = parseTakaInput('1,23,456.78');
+  it('round-trips with parseAmountInput', () => {
+    const parsed = parseAmountInput('1,23,456.78');
     expect(parsed).not.toBeNull();
-    expect(formatTaka(parsed!)).toBe('৳1,23,456.78');
+    expect(formatMoney(parsed!)).toBe('৳1,23,456.78');
   });
 });

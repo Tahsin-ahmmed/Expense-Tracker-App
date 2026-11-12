@@ -7,7 +7,7 @@ import {
   type BudgetEntry,
 } from '../budget';
 import type { MonthKey } from '../date';
-import { toPoisha } from '../money';
+import { toMinor } from '../money';
 import { makeTransaction } from '@/test-utils/transactions';
 
 const nov = '2026-11' as MonthKey;
@@ -20,7 +20,7 @@ function entry(
   return {
     scope,
     effectiveFrom: effectiveFrom as MonthKey,
-    limit: limit === null ? null : toPoisha(limit),
+    limit: limit === null ? null : toMinor(limit),
     updatedAt: '2026-01-01T00:00:00Z',
   };
 }
@@ -86,7 +86,7 @@ describe('spendingByScope', () => {
 });
 
 describe('budgetProgress', () => {
-  const limit = toPoisha(100000);
+  const limit = toMinor(100000);
 
   it.each([
     [0, 0, 'ok'],
@@ -96,7 +96,7 @@ describe('budgetProgress', () => {
     [100001, 100, 'over'],
     [150000, 150, 'over'],
   ])('spent %i → %i%% %s', (spent, percent, status) => {
-    const progress = budgetProgress('food', limit, toPoisha(spent));
+    const progress = budgetProgress('food', limit, toMinor(spent));
     expect(progress.percent).toBe(percent);
     expect(progress.status).toBe(status);
     expect(progress.remaining).toBe(100000 - spent);

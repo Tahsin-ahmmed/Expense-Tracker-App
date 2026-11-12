@@ -1,7 +1,7 @@
 import type { BudgetRepository } from '@/data';
 import type { BudgetEntry } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import { toPoisha } from '@/domain/money';
+import { toMinor } from '@/domain/money';
 
 import { createBudgetsStore } from '../store';
 
@@ -23,7 +23,7 @@ function fakeRepository(overrides: Partial<BudgetRepository> = {}): BudgetReposi
 const existing: BudgetEntry = {
   scope: 'food',
   effectiveFrom: nov,
-  limit: toPoisha(500000),
+  limit: toMinor(500000),
   updatedAt: '2026-11-01T00:00:00Z',
 };
 
@@ -48,8 +48,8 @@ describe('budgets store', () => {
     );
     await store.getState().load();
 
-    await store.getState().setLimit('food', nov, toPoisha(700000));
-    await store.getState().setLimit('overall', nov, toPoisha(3000000));
+    await store.getState().setLimit('food', nov, toMinor(700000));
+    await store.getState().setLimit('overall', nov, toMinor(3000000));
 
     const entries = store.getState().entries;
     expect(entries).toHaveLength(2);

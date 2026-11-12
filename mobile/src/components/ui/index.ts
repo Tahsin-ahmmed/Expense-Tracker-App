@@ -6,6 +6,7 @@ export { Chip, type ChipProps } from './Chip';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Icon, type IconProps } from './Icon';
 export { IconButton, type IconButtonProps } from './IconButton';
+export { ListRow, type ListRowProps } from './ListRow';
 export { PinField, type PinFieldProps } from './PinField';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { Screen, type ScreenProps } from './Screen';

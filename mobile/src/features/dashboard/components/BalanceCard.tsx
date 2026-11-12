@@ -1,22 +1,57 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Icon, type IconProps } from '@/components/ui';
-import { formatTaka, type Poisha } from '@/domain/money';
+import type { MonthStart } from '@/domain/balance';
+import type { IsoDate, MonthKey } from '@/domain/date';
+import { formatMoney, toMinor, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
+import { formatDateLabel, formatMonthLabel } from '@/i18n/format';
 import { colors, radius, spacing } from '@/theme';
 
 export interface BalanceCardProps {
-  balance: Poisha;
-  income: Poisha;
-  expense: Poisha;
+  /** All-time balance; null until the user sets an opening balance. */
+  currentBalance: MinorAmount | null;
+  month: MonthKey;
+  monthStart: MonthStart | null;
+  income: MinorAmount;
+  expense: MinorAmount;
+  today: IsoDate;
+  onSetBalance: () => void;
 }
 
-/** Highlighted card with this month's balance, income and expense. */
-export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
+/**
+ * Hero card: the user's current balance (or this month's net until an
+ * opening balance is set), how the month started, and this month's flows.
+ */
+export function BalanceCard({
+  currentBalance,
+  month,
+  monthStart,
+  income,
+  expense,
+  today,
+  onSetBalance,
+}: BalanceCardProps) {
+  const hasBalance = currentBalance !== null;
+  const headline = hasBalance ? currentBalance : toMinor(income - expense);
+
+  let startLine: string | null = null;
+  if (monthStart?.kind === 'carryOver') {
+    startLine = t('dashboard.startedWith', {
+      month: formatMonthLabel(month).split(' ')[0],
+      amount: formatMoney(monthStart.amount),
+    });
+  } else if (monthStart?.kind === 'opening') {
+    startLine = t('dashboard.openedWith', {
+      amount: formatMoney(monthStart.amount),
+      date: formatDateLabel(monthStart.date, today),
+    });
+  }
+
   return (
     <View style={styles.card}>
       <AppText variant="label" style={styles.muted}>
-        {t('dashboard.balanceThisMonth')}
+        {hasBalance ? t('dashboard.currentBalance') : t('dashboard.balanceThisMonth')}
       </AppText>
       <AppText
         variant="title"
@@ -24,23 +59,53 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
         testID="balance-amount"
         adjustsFontSizeToFit
         numberOfLines={1}>
-        {formatTaka(balance)}
+        {formatMoney(headline)}
       </AppText>
 
-      <View style={styles.row}>
-        <Figure
-          label={t('dashboard.income')}
-          amount={income}
-          icon={{ ios: 'arrow.down.left', android: 'south_west' }}
-          testID="income-amount"
-        />
-        <View style={styles.divider} />
-        <Figure
-          label={t('dashboard.expense')}
-          amount={expense}
-          icon={{ ios: 'arrow.up.right', android: 'north_east' }}
-          testID="expense-amount"
-        />
+      {startLine ? (
+        <AppText variant="caption" style={styles.muted} testID="month-start">
+          {startLine}
+        </AppText>
+      ) : null}
+
+      {!hasBalance ? (
+        <Pressable
+          testID="set-balance"
+          onPress={onSetBalance}
+          accessibilityRole="button"
+          accessibilityLabel={t('dashboard.setBalance')}
+          accessibilityHint={t('dashboard.setBalanceHint')}
+          style={({ pressed }) => [styles.setBalance, pressed && styles.pressed]}>
+          <Icon
+            name={{ ios: 'plus.circle', android: 'add_circle' }}
+            size={16}
+            color={colors.onPrimary}
+          />
+          <AppText variant="caption" style={styles.onPrimary}>
+            {t('dashboard.setBalance')}
+          </AppText>
+        </Pressable>
+      ) : null}
+
+      <View style={styles.monthBox}>
+        <AppText variant="caption" style={styles.muted}>
+          {t('dashboard.thisMonth')}
+        </AppText>
+        <View style={styles.row}>
+          <Figure
+            label={t('dashboard.income')}
+            amount={income}
+            icon={{ ios: 'arrow.down.left', android: 'south_west' }}
+            testID="income-amount"
+          />
+          <View style={styles.divider} />
+          <Figure
+            label={t('dashboard.expense')}
+            amount={expense}
+            icon={{ ios: 'arrow.up.right', android: 'north_east' }}
+            testID="expense-amount"
+          />
+        </View>
       </View>
     </View>
   );
@@ -48,7 +113,7 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
 
 interface FigureProps {
   label: string;
-  amount: Poisha;
+  amount: MinorAmount;
   icon: IconProps['name'];
   testID: string;
 }
@@ -63,7 +128,7 @@ function Figure({ label, amount, icon, testID }: FigureProps) {
         </AppText>
       </View>
       <AppText variant="label" style={styles.onPrimary} testID={testID} numberOfLines={1}>
-        {formatTaka(amount)}
+        {formatMoney(amount)}
       </AppText>
     </View>
   );
@@ -74,6 +139,7 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     borderRadius: radius.lg,
     backgroundColor: colors.primary,
+    gap: spacing.xs,
   },
   muted: {
     color: colors.onPrimary,
@@ -83,14 +149,34 @@ const styles = StyleSheet.create({
     color: colors.onPrimary,
     fontSize: 34,
     lineHeight: 42,
-    marginTop: spacing.xs,
   },
   onPrimary: {
     color: colors.onPrimary,
   },
+  setBalance: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.onPrimary,
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  monthBox: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryPressed,
+    gap: spacing.xs,
+  },
   row: {
     flexDirection: 'row',
-    marginTop: spacing.lg,
   },
   divider: {
     width: StyleSheet.hairlineWidth,

@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card, ProgressBar } from '@/components/ui';
-import { formatTaka } from '@/domain/money';
+import { formatMoney } from '@/domain/money';
 import { CATEGORY_APPEARANCE } from '@/features/transactions/categoryAppearance';
 import { CategoryBadge } from '@/features/transactions/components/CategoryBadge';
 import { t } from '@/i18n';
@@ -28,7 +28,7 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
       {categories.map((item) => {
         const appearance = CATEGORY_APPEARANCE[item.categoryId];
         const label = t(appearance.labelKey);
-        const amount = formatTaka(item.amount);
+        const amount = formatMoney(item.amount);
         return (
           <View key={item.categoryId} style={styles.row}>
             <CategoryBadge categoryId={item.categoryId} size={32} />

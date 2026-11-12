@@ -183,6 +183,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 - Install packages with `npx expo install <package>` (not `npm install`) so versions match the SDK.
 - Before declaring work done in `mobile/`, run `npm run check` (typecheck, lint, Prettier check, Jest).
 - Mobile source layout (`mobile/src/`): `app/` routes only (thin screens) · `components/ui/` reusable UI · `features/<name>/` feature code (components, hooks, services, types) · `domain/` plain-TS business rules (e.g. `money.ts`) · `data/` repositories (local now, Supabase in M6) · `theme/` tokens · `i18n/` strings via `t()`.
+- Auth: sign in with email OR phone number plus a 6-digit numeric PIN (stored as the Supabase password). The app enforces digits-only and rejects easy PINs; the server enforces min length 6. No email/SMS confirmation yet; SMS OTP on new devices is the planned follow-up.
 - Never hardcode user-facing strings, colours or spacing: use `t()`, `colors`, `spacing`/`radius`, and `AppText` variants.
 - Money: `Poisha` type in `src/domain/money.ts`; use `parseTakaInput` and `formatTaka` (lakh/crore grouping).
 - Dates: transactions store `occurredOn` as an `IsoDate` calendar day in Dhaka (`src/domain/date.ts`, fixed UTC+6) plus a UTC `createdAt`. Get "today" in components via `useToday()`.

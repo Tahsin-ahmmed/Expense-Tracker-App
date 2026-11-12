@@ -18,8 +18,8 @@ import { RecentTransactions } from './RecentTransactions';
 export interface DashboardViewProps {
   summary: DashboardSummary;
   budgets: MonthBudgets;
-  /** All-time balance; null until an opening balance is set. */
-  currentBalance: MinorAmount | null;
+  /** Starting balance plus everything recorded up to today. */
+  currentBalance: MinorAmount;
   monthStart: MonthStart | null;
   today: IsoDate;
   onAdd: (type: TransactionType) => void;
@@ -50,7 +50,6 @@ export function DashboardView({
         monthStart={monthStart}
         income={summary.income}
         expense={summary.expense}
-        today={today}
       />
 
       <QuickActions onAdd={onAdd} />

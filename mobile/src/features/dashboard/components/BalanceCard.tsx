@@ -2,25 +2,24 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, Icon, type IconProps } from '@/components/ui';
 import type { MonthStart } from '@/domain/balance';
-import type { IsoDate, MonthKey } from '@/domain/date';
-import { formatMoney, toMinor, type MinorAmount } from '@/domain/money';
+import type { MonthKey } from '@/domain/date';
+import { formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
-import { formatDateLabel, formatMonthLabel } from '@/i18n/format';
+import { formatMonthLabel } from '@/i18n/format';
 import { colors, radius, spacing } from '@/theme';
 
 export interface BalanceCardProps {
-  /** All-time balance; null until the user sets an opening balance. */
-  currentBalance: MinorAmount | null;
+  /** Starting balance plus everything recorded up to today. */
+  currentBalance: MinorAmount;
   month: MonthKey;
   monthStart: MonthStart | null;
   income: MinorAmount;
   expense: MinorAmount;
-  today: IsoDate;
 }
 
 /**
- * Hero card: the user's current balance (or this month's net until an
- * opening balance is set), how the month started, and this month's flows.
+ * Hero card: the user's current balance, how the month started, and this
+ * month's income and expense.
  */
 export function BalanceCard({
   currentBalance,
@@ -28,11 +27,7 @@ export function BalanceCard({
   monthStart,
   income,
   expense,
-  today,
 }: BalanceCardProps) {
-  const hasBalance = currentBalance !== null;
-  const headline = hasBalance ? currentBalance : toMinor(income - expense);
-
   let startLine: string | null = null;
   if (monthStart?.kind === 'carryOver') {
     startLine = t('dashboard.startedWith', {
@@ -40,16 +35,13 @@ export function BalanceCard({
       amount: formatMoney(monthStart.amount),
     });
   } else if (monthStart?.kind === 'opening') {
-    startLine = t('dashboard.openedWith', {
-      amount: formatMoney(monthStart.amount),
-      date: formatDateLabel(monthStart.date, today),
-    });
+    startLine = t('dashboard.openedWith', { amount: formatMoney(monthStart.amount) });
   }
 
   return (
     <View style={styles.card}>
       <AppText variant="label" style={styles.muted}>
-        {hasBalance ? t('dashboard.currentBalance') : t('dashboard.balanceThisMonth')}
+        {t('dashboard.currentBalance')}
       </AppText>
       <AppText
         variant="title"
@@ -57,7 +49,7 @@ export function BalanceCard({
         testID="balance-amount"
         adjustsFontSizeToFit
         numberOfLines={1}>
-        {formatMoney(headline)}
+        {formatMoney(currentBalance)}
       </AppText>
 
       {startLine ? (

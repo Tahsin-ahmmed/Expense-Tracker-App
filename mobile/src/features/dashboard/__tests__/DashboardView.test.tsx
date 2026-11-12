@@ -25,7 +25,7 @@ function renderDashboard(
     <DashboardView
       summary={buildDashboardSummary(transactions, today)}
       budgets={buildMonthBudgets(entries, transactions, month)}
-      currentBalance={null}
+      currentBalance={toMinor(0)}
       monthStart={null}
       today={today}
       onAdd={jest.fn()}
@@ -44,13 +44,18 @@ describe('DashboardView', () => {
   });
 
   it('shows totals, category spending and recent transactions', async () => {
-    await renderDashboard([
-      makeTransaction({ type: 'income', categoryId: 'salary', amount: 5000000 }),
-      makeTransaction({ categoryId: 'rent', amount: 1500000, occurredOn: '2026-11-12' }),
-      makeTransaction({ categoryId: 'food', amount: 125050, note: 'Biryani' }),
-    ]);
+    await renderDashboard(
+      [
+        makeTransaction({ type: 'income', categoryId: 'salary', amount: 5000000 }),
+        makeTransaction({ categoryId: 'rent', amount: 1500000, occurredOn: '2026-11-12' }),
+        makeTransaction({ categoryId: 'food', amount: 125050, note: 'Biryani' }),
+      ],
+      [],
+      { currentBalance: toMinor(5874950) },
+    );
 
-    expect(screen.getByTestId('balance-amount')).toHaveTextContent('৳33,749.50');
+    expect(screen.getByText('Current balance')).toBeOnTheScreen();
+    expect(screen.getByTestId('balance-amount')).toHaveTextContent('৳58,749.50');
     expect(screen.getByTestId('income-amount')).toHaveTextContent('৳50,000.00');
     expect(screen.getByTestId('expense-amount')).toHaveTextContent('৳16,250.50');
     expect(screen.getByText('92%')).toBeOnTheScreen();
@@ -107,14 +112,6 @@ describe('DashboardView', () => {
   });
 
   describe('balance and budget redesign', () => {
-    it("shows this month's net while no starting balance exists", async () => {
-      await renderDashboard([makeTransaction({ amount: 50000 })]);
-
-      expect(screen.getByText('Balance this month')).toBeOnTheScreen();
-      expect(screen.getByTestId('balance-amount')).toHaveTextContent('-৳500.00');
-      expect(screen.queryByTestId('set-balance')).toBeNull();
-    });
-
     it('offers add expense and add income as equal-weight actions', async () => {
       await renderDashboard();
 

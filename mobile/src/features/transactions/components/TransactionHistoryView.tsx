@@ -83,7 +83,7 @@ export function TransactionHistoryView({
         </View>
       </View>
 
-      {monthStart ? <MonthStartRow start={monthStart} today={today} /> : null}
+      {monthStart ? <MonthStartRow start={monthStart} /> : null}
 
       <SegmentedControl
         options={TYPE_OPTIONS}
@@ -207,12 +207,12 @@ const styles = StyleSheet.create({
   },
 });
 
-/** "Carried over from October +৳5,000" or "Opening balance ৳25,000 · 12 Nov". */
-function MonthStartRow({ start, today }: { start: MonthStart; today: IsoDate }) {
+/** "Carried over from October +৳5,000" or "Starting balance +৳25,000". */
+function MonthStartRow({ start }: { start: MonthStart }) {
   const label =
     start.kind === 'carryOver'
       ? t('carryOver.from', { month: formatMonthLabel(start.fromMonth) })
-      : `${t('carryOver.opening')} · ${formatDateLabel(start.date, today)}`;
+      : t('carryOver.opening');
   const negative = start.amount < 0;
   const amount = `${negative ? '−' : '+'}${formatMoney(toMinor(Math.abs(start.amount)))}`;
   return (

@@ -4,16 +4,13 @@ import { Alert } from 'react-native';
 import type { ProfileRepository } from '@/data/repositories';
 import type { AppSupabaseClient } from '@/data/supabase/client';
 import { createSupabaseProfileRepository } from '@/data/supabase/profileRepository';
-import type { IsoDate } from '@/domain/date';
 import { toMinor } from '@/domain/money';
 import { DEFAULT_PROFILE, type Profile } from '@/domain/profile';
 import { parseSignedAmountInput } from '@/lib/amountInput';
 
 import { ProfileForm } from '../components/ProfileForm';
-import { createProfileFormSchema, toProfileFormValues } from '../schema';
+import { profileFormSchema, toProfileFormValues } from '../schema';
 import { createProfileStore } from '../store';
-
-const today = '2026-11-12' as IsoDate;
 
 describe('parseSignedAmountInput', () => {
   it.each([
@@ -33,52 +30,43 @@ describe('parseSignedAmountInput', () => {
 });
 
 describe('profile form schema', () => {
-  const schema = createProfileFormSchema(today);
-  const base = toProfileFormValues(DEFAULT_PROFILE, today);
+  const base = toProfileFormValues(DEFAULT_PROFILE);
 
-  it('starts empty with today as the balance date', () => {
+  it('starts from the profile values', () => {
     expect(base).toEqual({
       displayName: '',
       currency: 'BDT',
-      openingBalance: '',
-      openingBalanceDate: today,
+      openingBalance: '0',
       weekStartsOn: 6,
     });
   });
 
-  it('leaves the opening balance unset when the amount is empty', () => {
-    expect(schema.parse(base)).toMatchObject({
-      displayName: null,
-      openingBalance: 0,
-      openingBalanceDate: null,
-    });
-  });
-
-  it('saves a trimmed name, currency and a (possibly negative) opening balance', () => {
+  it('saves a trimmed name, currency, opening balance and week start', () => {
     expect(
-      schema.parse({
-        ...base,
+      profileFormSchema.parse({
         displayName: '  Rahim ',
         currency: 'USD',
         openingBalance: '-1,250.50',
-        openingBalanceDate: '2026-11-01',
         weekStartsOn: 1,
       }),
     ).toEqual({
       displayName: 'Rahim',
       currency: 'USD',
       openingBalance: -125050,
-      openingBalanceDate: '2026-11-01',
       weekStartsOn: 1,
     });
   });
 
-  it('rejects a bad amount or a future balance date', () => {
-    expect(schema.safeParse({ ...base, openingBalance: '12abc' }).success).toBe(false);
-    expect(
-      schema.safeParse({ ...base, openingBalance: '100', openingBalanceDate: '2026-11-13' })
-        .success,
-    ).toBe(false);
+  it('treats an empty opening balance as 0 and rejects malformed ones', () => {
+    expect(profileFormSchema.parse({ ...base, openingBalance: '' }).openingBalance).toBe(0);
+    expect(profileFormSchema.safeParse({ ...base, openingBalance: '12abc' }).success).toBe(false);
+  });
+
+  it('stores an empty name as null and rejects a name over 60 characters', () => {
+    expect(profileFormSchema.parse(base).displayName).toBeNull();
+    expect(profileFormSchema.safeParse({ ...base, displayName: 'x'.repeat(61) }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -210,22 +198,15 @@ describe('ProfileForm', () => {
       buttons?.find((button) => button.text === 'Change')?.onPress?.();
     });
     const onSave = jest.fn().mockResolvedValue(undefined);
-    await render(<ProfileForm profile={DEFAULT_PROFILE} today={today} onSave={onSave} />);
+    await render(<ProfileForm profile={DEFAULT_PROFILE} onSave={onSave} />);
 
     await fireEvent.press(screen.getByTestId('currency-USD'));
-    await fireEvent.changeText(screen.getByTestId('opening-balance-input'), '25000');
     await fireEvent.press(screen.getByTestId('save-profile'));
     await screen.findByTestId('save-profile');
 
     expect(alert).toHaveBeenCalledTimes(1);
     expect(alert.mock.calls[0][1]).toContain('$1,000.00');
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currency: 'USD',
-        openingBalance: 2500000,
-        openingBalanceDate: today,
-      }),
-    );
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ currency: 'USD' }));
   });
 
   it('does not save when the currency change is cancelled', async () => {
@@ -233,7 +214,7 @@ describe('ProfileForm', () => {
       buttons?.find((button) => button.style === 'cancel')?.onPress?.();
     });
     const onSave = jest.fn().mockResolvedValue(undefined);
-    await render(<ProfileForm profile={DEFAULT_PROFILE} today={today} onSave={onSave} />);
+    await render(<ProfileForm profile={DEFAULT_PROFILE} onSave={onSave} />);
 
     await fireEvent.press(screen.getByTestId('currency-EUR'));
     await fireEvent.press(screen.getByTestId('save-profile'));
@@ -245,13 +226,16 @@ describe('ProfileForm', () => {
   it('saves without asking when the currency is unchanged', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const onSave = jest.fn().mockResolvedValue(undefined);
-    await render(<ProfileForm profile={DEFAULT_PROFILE} today={today} onSave={onSave} />);
+    await render(<ProfileForm profile={DEFAULT_PROFILE} onSave={onSave} />);
 
     await fireEvent.changeText(screen.getByTestId('name-input'), 'Rahim');
+    await fireEvent.changeText(screen.getByTestId('opening-balance-input'), '1000');
     await fireEvent.press(screen.getByTestId('save-profile'));
     await screen.findByTestId('save-profile');
 
     expect(alert).not.toHaveBeenCalled();
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ displayName: 'Rahim' }));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ displayName: 'Rahim', openingBalance: 100000 }),
+    );
   });
 });

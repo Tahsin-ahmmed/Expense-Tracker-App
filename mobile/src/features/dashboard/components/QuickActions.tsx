@@ -50,10 +50,15 @@ export function QuickActions({ onAdd }: QuickActionsProps) {
           <View style={[styles.iconCircle, { backgroundColor: action.soft }]}>
             <Icon name={action.icon} size={20} color={action.color} />
           </View>
-          <AppText variant="label" numberOfLines={1} style={styles.label}>
+          {/* Full label always visible: shrinks slightly on very narrow screens instead of "Add expen…". */}
+          <AppText
+            variant="label"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
+            style={styles.label}>
             {t(action.labelKey)}
           </AppText>
-          <Icon name={{ ios: 'plus', android: 'add' }} size={18} color="textMuted" />
         </Pressable>
       ))}
     </View>
@@ -70,9 +75,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.sm,
     minHeight: 56,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.lg,
     backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
@@ -89,6 +95,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   label: {
-    flex: 1,
+    flexShrink: 1,
   },
 });

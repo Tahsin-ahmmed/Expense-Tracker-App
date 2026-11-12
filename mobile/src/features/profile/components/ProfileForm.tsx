@@ -1,20 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, Button, Chip, TextField } from '@/components/ui';
 import { CURRENCIES, CURRENCY_CODES, type CurrencyCode } from '@/domain/currency';
-import type { IsoDate } from '@/domain/date';
 import { formatMoney, toMinor } from '@/domain/money';
 import type { Profile, ProfileUpdate } from '@/domain/profile';
-import { DateField } from '@/features/transactions/components/DateField';
 import { t, type TranslationKey } from '@/i18n';
 import { colors, spacing } from '@/theme';
 
 import {
-  createProfileFormSchema,
+  profileFormSchema,
   toProfileFormValues,
   WEEK_START_CHOICES,
   type ProfileFormValues,
@@ -22,7 +20,6 @@ import {
 
 export interface ProfileFormProps {
   profile: Profile;
-  today: IsoDate;
   /** Throws on failure. */
   onSave: (update: ProfileUpdate) => Promise<void>;
 }
@@ -44,17 +41,16 @@ function confirmCurrencyChange(to: CurrencyCode): Promise<boolean> {
   });
 }
 
-export function ProfileForm({ profile, today, onSave }: ProfileFormProps) {
+export function ProfileForm({ profile, onSave }: ProfileFormProps) {
   const insets = useSafeAreaInsets();
   const [failed, setFailed] = useState(false);
-  const schema = useMemo(() => createProfileFormSchema(today), [today]);
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues, unknown, ProfileUpdate>({
-    resolver: zodResolver(schema),
-    defaultValues: toProfileFormValues(profile, today),
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: toProfileFormValues(profile),
   });
 
   const save = handleSubmit(async (update) => {
@@ -140,19 +136,6 @@ export function ProfileForm({ profile, today, onSave }: ProfileFormProps) {
           <AppText variant="caption" color="textSecondary">
             {t('profile.openingBalanceHint')}
           </AppText>
-          <Controller
-            control={control}
-            name="openingBalanceDate"
-            render={({ field }) => (
-              <DateField
-                label={t('profile.openingBalanceDate')}
-                value={field.value}
-                onChange={field.onChange}
-                today={today}
-                error={errors.openingBalanceDate?.message}
-              />
-            )}
-          />
         </View>
 
         <Controller
@@ -215,7 +198,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   group: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   footer: {
     padding: spacing.lg,

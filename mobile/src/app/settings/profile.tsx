@@ -5,12 +5,10 @@ import type { ProfileUpdate } from '@/domain/profile';
 import { ProfileForm } from '@/features/profile/components/ProfileForm';
 import { useProfileStore } from '@/features/profile/useProfileStore';
 import { useAppData } from '@/hooks/useAppData';
-import { useToday } from '@/hooks/useToday';
 import { t } from '@/i18n';
 
-/** Name, currency, opening balance and week start. */
+/** Name, currency and week start. */
 export default function ProfileScreen() {
-  const { today } = useToday();
   const { status, retry } = useAppData();
   const profile = useProfileStore((state) => state.profile);
   const update = useProfileStore((state) => state.update);
@@ -27,5 +25,5 @@ export default function ProfileScreen() {
     router.back();
   };
 
-  return <ProfileForm profile={profile} today={today} onSave={handleSave} />;
+  return <ProfileForm profile={profile} onSave={handleSave} />;
 }

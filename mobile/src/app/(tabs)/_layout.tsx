@@ -1,4 +1,8 @@
+import { router } from 'expo-router';
 import { NativeTabs } from 'expo-router/native-tabs';
+import { useEffect, useRef } from 'react';
+
+import { useProfileStore } from '@/features/profile/useProfileStore';
 
 import { t } from '@/i18n';
 import { colors } from '@/theme';
@@ -8,6 +12,19 @@ import { colors } from '@/theme';
  * Icons: SF Symbols on iOS (`sf`), Material Symbols on Android (`md`).
  */
 export default function TabsLayout() {
+  const profileReady = useProfileStore((state) => state.status === 'ready');
+  // The welcome setup saves the starting balance date; until then it is still pending.
+  const needsWelcome = useProfileStore((state) => state.profile.openingBalanceDate === null);
+  const welcomeShown = useRef(false);
+
+  // First login: open the welcome setup once, on top of the dashboard.
+  useEffect(() => {
+    if (profileReady && needsWelcome && !welcomeShown.current) {
+      welcomeShown.current = true;
+      router.push('/welcome');
+    }
+  }, [profileReady, needsWelcome]);
+
   return (
     <NativeTabs
       backgroundColor={colors.surface}

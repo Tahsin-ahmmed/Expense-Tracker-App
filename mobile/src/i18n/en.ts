@@ -65,11 +65,8 @@ export const en = {
   'dashboard.balanceThisMonth': 'Balance this month',
   'dashboard.currentBalance': 'Current balance',
   'dashboard.thisMonth': 'This month',
-  'dashboard.setBalance': 'Set your current balance',
-  'dashboard.setBalanceHint':
-    'Tell us how much money you have now, and HisabBondhu will keep your balance up to date.',
   'dashboard.startedWith': 'Started {month} with {amount}',
-  'dashboard.openedWith': 'Opening balance {amount} on {date}',
+  'dashboard.openedWith': 'Starting balance {amount}',
   'dashboard.budgetLeft': '{amount} left',
   'dashboard.budgetOver': '{amount} over budget',
   'dashboard.budgetSpentOf': '{spent} of {limit} spent',
@@ -224,7 +221,6 @@ export const en = {
   'settings.profile': 'Profile & preferences',
   'settings.currency': 'Currency',
   'settings.openingBalance': 'Opening balance',
-  'settings.notSet': 'Not set',
   'settings.theme': 'Theme',
   'settings.language': 'Language',
   'settings.languageValue': 'English',
@@ -249,8 +245,7 @@ export const en = {
   'profile.currencyChangeConfirm': 'Change',
   'profile.openingBalance': 'Opening balance',
   'profile.openingBalanceHint':
-    'How much money you had on the date below (cash, bKash, bank together). Use a minus sign if you owe money.',
-  'profile.openingBalanceDate': 'Balance date',
+    'Added to your balance: current balance = opening balance + income − expense. Use a minus sign if you owe money.',
   'profile.openingBalanceInvalid': 'Enter an amount like 25000, 1,250.50 or -500.',
   'profile.weekStartsOn': 'Week starts on',
   'profile.saved': 'Saved.',
@@ -261,7 +256,7 @@ export const en = {
 
   'welcome.title': 'Welcome to HisabBondhu',
   'welcome.subtitle':
-    'A few details to set up your account. You can change them later in Settings.',
+    'Tell us a little about you to get started. Name and currency can be changed later in Settings.',
   'welcome.balance': 'How much money do you have right now?',
   'welcome.balanceHint':
     'Add up your cash, bKash/Nagad and bank balance. Enter 0 if you are not sure, or use a minus sign if you owe money.',
@@ -279,7 +274,7 @@ export const en = {
   'deleteAccount.done': 'Your account has been deleted.',
 
   'carryOver.from': 'Carried over from {month}',
-  'carryOver.opening': 'Opening balance',
+  'carryOver.opening': 'Starting balance',
 
   'auth.tagline': 'Your personal money friend',
   'auth.identifier': 'Email or phone number',

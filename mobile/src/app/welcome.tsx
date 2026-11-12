@@ -1,21 +1,65 @@
+import { router } from 'expo-router';
+import { useEffect } from 'react';
+import { BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { AppText } from '@/components/ui';
 import type { ProfileUpdate } from '@/domain/profile';
-import { AuthScaffold } from '@/features/auth/components/AuthScaffold';
 import { WelcomeForm } from '@/features/onboarding/components/WelcomeForm';
 import { useProfileStore } from '@/features/profile/useProfileStore';
 import { useToday } from '@/hooks/useToday';
 import { t } from '@/i18n';
+import { colors, spacing } from '@/theme';
 
 /**
- * First-run setup, shown once after sign-up (or to any account without a
- * starting balance). Saving the profile unlocks the app via the root layout.
+ * First-login setup, opened as a modal over the dashboard: name, currency and
+ * starting balance. It stays open until saved (swipe-down and the Android
+ * back button are disabled), so every account gets a starting balance.
  */
 export default function WelcomeScreen() {
   const { today } = useToday();
   const update = useProfileStore((state) => state.update);
 
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => subscription.remove();
+  }, []);
+
+  const handleSubmit = async (changes: ProfileUpdate) => {
+    await update(changes);
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
   return (
-    <AuthScaffold title={t('welcome.title')}>
-      <WelcomeForm today={today} onSubmit={(changes: ProfileUpdate) => update(changes)} />
-    </AuthScaffold>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <AppText variant="title" accessibilityRole="header">
+            {t('welcome.title')}
+          </AppText>
+          <WelcomeForm today={today} onSubmit={handleSubmit} />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  content: {
+    padding: spacing.xl,
+    gap: spacing.lg,
+  },
+});

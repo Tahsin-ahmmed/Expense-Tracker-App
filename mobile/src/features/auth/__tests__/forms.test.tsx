@@ -149,7 +149,7 @@ describe('SettingsView', () => {
 
     expect(screen.getByTestId('account-name')).toHaveTextContent('01712-345678');
     expect(screen.getByTestId('row-currency')).toHaveTextContent('CurrencyBDT (৳)');
-    expect(screen.getByTestId('row-opening-balance')).toHaveTextContent(/Not set/);
+    expect(screen.getByTestId('row-opening-balance')).toHaveTextContent('Opening balance৳0');
     expect(screen.getByText('1.0.0')).toBeOnTheScreen();
   });
 

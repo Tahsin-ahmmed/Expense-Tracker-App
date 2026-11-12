@@ -120,11 +120,7 @@ export function SettingsView({
           testID="row-opening-balance"
           icon={{ ios: 'wallet.pass', android: 'account_balance_wallet' }}
           label={t('settings.openingBalance')}
-          value={
-            profile.openingBalanceDate
-              ? formatMoney(profile.openingBalance, { decimals: 'auto' })
-              : t('settings.notSet')
-          }
+          value={formatMoney(profile.openingBalance, { decimals: 'auto' })}
           onPress={onOpenProfile}
         />
         <ListRow

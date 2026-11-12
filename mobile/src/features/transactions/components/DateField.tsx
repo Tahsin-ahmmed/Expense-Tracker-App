@@ -1,12 +1,12 @@
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { AppText, Chip, Icon } from '@/components/ui';
 import { addDays, fromPickerDate, isIsoDate, toPickerDate, type IsoDate } from '@/domain/date';
 import { t } from '@/i18n';
 import { formatDateLabel } from '@/i18n/format';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles, useColors } from '@/theme';
 
 export interface DateFieldProps {
   label: string;
@@ -18,6 +18,8 @@ export interface DateFieldProps {
 
 /** Date choice: quick "Today" / "Yesterday" chips plus the native date picker. */
 export function DateField({ label, value, onChange, today, error }: DateFieldProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const [showIosPicker, setShowIosPicker] = useState(false);
   const yesterday = addDays(today, -1);
   const isOther = isIsoDate(value) && value !== today && value !== yesterday;
@@ -92,7 +94,7 @@ export function DateField({ label, value, onChange, today, error }: DateFieldPro
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   label: {
     marginBottom: spacing.xs,
   },
@@ -104,4 +106,4 @@ const styles = StyleSheet.create({
   error: {
     marginTop: spacing.xs,
   },
-});
+}));

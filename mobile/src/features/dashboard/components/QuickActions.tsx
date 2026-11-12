@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, Icon, type IconProps } from '@/components/ui';
 import type { TransactionType } from '@/domain/transaction';
 import { t, type TranslationKey } from '@/i18n';
-import { colors, radius, spacing, type ColorToken } from '@/theme';
+import { radius, spacing, type ColorToken, createStyles, useColors } from '@/theme';
 
 export interface QuickActionsProps {
   onAdd: (type: TransactionType) => void;
@@ -14,21 +14,21 @@ const ACTIONS: {
   labelKey: TranslationKey;
   icon: IconProps['name'];
   color: ColorToken;
-  soft: string;
+  soft: ColorToken;
 }[] = [
   {
     type: 'expense',
     labelKey: 'dashboard.addExpense',
     icon: { ios: 'arrow.up.right', android: 'north_east' },
     color: 'expense',
-    soft: colors.expenseSoft,
+    soft: 'expenseSoft',
   },
   {
     type: 'income',
     labelKey: 'dashboard.addIncome',
     icon: { ios: 'arrow.down.left', android: 'south_west' },
     color: 'income',
-    soft: colors.incomeSoft,
+    soft: 'incomeSoft',
   },
 ];
 
@@ -37,6 +37,8 @@ const ACTIONS: {
  * told apart by their icon and label, so neither looks "selected".
  */
 export function QuickActions({ onAdd }: QuickActionsProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.row}>
       {ACTIONS.map((action) => (
@@ -47,7 +49,7 @@ export function QuickActions({ onAdd }: QuickActionsProps) {
           accessibilityRole="button"
           accessibilityLabel={t(action.labelKey)}
           style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-          <View style={[styles.iconCircle, { backgroundColor: action.soft }]}>
+          <View style={[styles.iconCircle, { backgroundColor: colors[action.soft] }]}>
             <Icon name={action.icon} size={20} color={action.color} />
           </View>
           {/* Full label always visible: shrinks slightly on very narrow screens instead of "Add expen…". */}
@@ -65,7 +67,7 @@ export function QuickActions({ onAdd }: QuickActionsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   row: {
     flexDirection: 'row',
     gap: spacing.md,
@@ -97,4 +99,4 @@ const styles = StyleSheet.create({
   label: {
     flexShrink: 1,
   },
-});
+}));

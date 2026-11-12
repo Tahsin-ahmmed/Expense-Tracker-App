@@ -6,7 +6,7 @@ import type { MonthKey } from '@/domain/date';
 import { formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles, useColors } from '@/theme';
 
 export interface BalanceCardProps {
   /** Starting balance plus everything recorded up to today. */
@@ -28,6 +28,7 @@ export function BalanceCard({
   income,
   expense,
 }: BalanceCardProps) {
+  const styles = useStyles();
   let startLine: string | null = null;
   if (monthStart?.kind === 'carryOver') {
     startLine = t('dashboard.startedWith', {
@@ -90,6 +91,8 @@ interface FigureProps {
 }
 
 function Figure({ label, amount, icon, testID }: FigureProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.figure}>
       <View style={styles.figureLabel}>
@@ -105,7 +108,7 @@ function Figure({ label, amount, icon, testID }: FigureProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   card: {
     padding: spacing.xl,
     borderRadius: radius.lg,
@@ -149,4 +152,4 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginBottom: 2,
   },
-});
+}));

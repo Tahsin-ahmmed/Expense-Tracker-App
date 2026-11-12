@@ -5,13 +5,14 @@ import { useEffect, useRef } from 'react';
 import { useProfileStore } from '@/features/profile/useProfileStore';
 
 import { t } from '@/i18n';
-import { colors } from '@/theme';
+import { useColors } from '@/theme';
 
 /**
  * Bottom tab navigation using the platform's native tab bar.
  * Icons: SF Symbols on iOS (`sf`), Material Symbols on Android (`md`).
  */
 export default function TabsLayout() {
+  const colors = useColors();
   const profileReady = useProfileStore((state) => state.status === 'ready');
   // The welcome setup saves the starting balance date; until then it is still pending.
   const needsWelcome = useProfileStore((state) => state.profile.openingBalanceDate === null);

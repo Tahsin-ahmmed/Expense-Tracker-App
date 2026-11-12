@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1–M7 done. Pre-M8 redesign in phases: A (profile, currency, opening balance & carry-over, settings menu, dashboard budget card) implemented, awaiting review; B dark mode; C transactions page + report line chart; D custom categories. Then M8.
+**Current milestone:** M1–M7 done. Pre-M8 redesign in phases: A (profile, currency, opening balance & carry-over, settings menu, dashboard budget card) implemented, awaiting review; B dark mode done (awaiting review); C transactions page redesign; D custom categories. Then M8.
 
 ## 12. Repository Notes
 
@@ -184,7 +184,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 - Before declaring work done in `mobile/`, run `npm run check` (typecheck, lint, Prettier check, Jest).
 - Mobile source layout (`mobile/src/`): `app/` routes only (thin screens) · `components/ui/` reusable UI · `features/<name>/` feature code (components, hooks, services, types) · `domain/` plain-TS business rules (e.g. `money.ts`) · `data/` repositories (local now, Supabase in M6) · `theme/` tokens · `i18n/` strings via `t()`.
 - Auth: sign in with email OR phone number plus a 6-digit numeric PIN (stored as the Supabase password). The app enforces digits-only and rejects easy PINs; the server enforces min length 6. No email/SMS confirmation yet; SMS OTP on new devices is the planned follow-up.
-- Never hardcode user-facing strings, colours or spacing: use `t()`, `colors`, `spacing`/`radius`, and `AppText` variants.
+- Never hardcode user-facing strings, colours or spacing: use `t()`, `spacing`/`radius`, `AppText` variants, and theme colours via `createStyles((colors) => ({...}))` (returns a `useStyles` hook) or `useColors()` in render. Constants outside components hold `ColorToken` names, never colour values. Light/dark palettes live in `src/theme/colors.ts` (same keys; chart colours validated per mode). Theme preference (system/light/dark) is in `profiles.theme`, applied via `setThemePreference`.
 - Money: `MinorAmount` (integer hundredths) in `src/domain/money.ts`; use `parseAmountInput` and `formatMoney`/`formatMoneyCompact`. Currency is per user (`profiles.currency`; the app offers BDT, INR, USD, EUR, GBP in `src/domain/currency.ts`, the DB constraint allows a wider list); amounts are never converted. DB money columns keep their names (`amount_poisha` = minor units). Display currency is applied via `applyDisplayCurrency` and `Screen` remounts content when it changes.
 - Balance: current balance = `profiles.opening_balance_minor` + all income − all expense (no date cut-off). Opening balance is asked once in the first-login welcome modal (`src/app/welcome.tsx`, opened from the tabs layout while `opening_balance_date` is null) and is editable in Settings → Profile & preferences. Carry-over per month is calculated in `src/domain/balance.ts`, never stored.
 - Dates: transactions store `occurredOn` as an `IsoDate` calendar day in Dhaka (`src/domain/date.ts`, fixed UTC+6) plus a UTC `createdAt`. Get "today" in components via `useToday()`.

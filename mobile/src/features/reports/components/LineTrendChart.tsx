@@ -5,7 +5,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { AppText, Card, Chip, Icon, TextButton } from '@/components/ui';
 import { formatMoney, formatMoneyCompact, toMinor, type MinorAmount } from '@/domain/money';
 import { t, type TranslationKey } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles, useColors, type ColorToken } from '@/theme';
 
 import { pointLabel, TREND_RANGES, type TrendRange, type TrendSeries } from '../series';
 import { niceAxisMax } from '../axis';
@@ -29,19 +29,19 @@ const SERIES = [
     key: 'income',
     labelKey: 'reports.income',
     tooltipKey: 'reports.tooltipIncome',
-    color: colors.income,
+    color: 'income',
   },
   {
     key: 'expense',
     labelKey: 'reports.expense',
     tooltipKey: 'reports.tooltipExpense',
-    color: colors.expense,
+    color: 'expense',
   },
 ] as const satisfies readonly {
   key: 'income' | 'expense';
   labelKey: TranslationKey;
   tooltipKey: TranslationKey;
-  color: string;
+  color: ColorToken;
 }[];
 
 const AVERAGE_LABEL: Record<TrendSeries['granularity'], TranslationKey> = {
@@ -71,6 +71,8 @@ function describeAverageChange(series: TrendSeries): { text: string; good: boole
  * a headline average with its change, range buttons, and a table view.
  */
 export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendChartProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const [width, setWidth] = useState(0);
   const [active, setActive] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
@@ -155,7 +157,7 @@ export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendC
         importantForAccessibility="no-hide-descendants">
         {SERIES.map((s) => (
           <View key={s.key} style={styles.legendItem}>
-            <View style={[styles.legendLine, { backgroundColor: s.color }]} />
+            <View style={[styles.legendLine, { backgroundColor: colors[s.color] }]} />
             <AppText variant="caption" color="textSecondary">
               {t(s.labelKey)}
             </AppText>
@@ -201,7 +203,7 @@ export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendC
               <Path
                 key={s.key}
                 d={pathFor(s.key)}
-                stroke={s.color}
+                stroke={colors[s.color]}
                 strokeWidth={2}
                 strokeLinejoin="round"
                 strokeLinecap="round"
@@ -215,7 +217,7 @@ export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendC
                     cx={x(active)}
                     cy={y(activePoint[s.key])}
                     r={5}
-                    fill={s.color}
+                    fill={colors[s.color]}
                     stroke={colors.surface}
                     strokeWidth={2}
                   />
@@ -252,7 +254,7 @@ export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendC
             </AppText>
             {SERIES.map((s) => (
               <View key={s.key} style={styles.legendItem}>
-                <View style={[styles.swatch, { backgroundColor: s.color }]} />
+                <View style={[styles.swatch, { backgroundColor: colors[s.color] }]} />
                 <AppText variant="caption">
                   {t(s.tooltipKey, { amount: formatMoney(activePoint[s.key]) })}
                 </AppText>
@@ -328,7 +330,7 @@ export function LineTrendChart({ series, onChangeRange, monthNames }: LineTrendC
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   card: {
     gap: spacing.md,
   },
@@ -376,7 +378,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
-    shadowColor: colors.text,
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
@@ -410,4 +412,4 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
   },
-});
+}));

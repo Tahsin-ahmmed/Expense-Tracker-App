@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText, Icon } from '@/components/ui';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles, useColors } from '@/theme';
 
 export interface AuthScaffoldProps {
   title: string;
@@ -13,6 +13,8 @@ export interface AuthScaffoldProps {
 
 /** Shared layout for the sign-in screens: brand header, title and form. */
 export function AuthScaffold({ title, children }: AuthScaffoldProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -52,7 +54,7 @@ export function FormError({ message }: { message: string | null }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -85,4 +87,4 @@ const styles = StyleSheet.create({
   form: {
     gap: spacing.lg,
   },
-});
+}));

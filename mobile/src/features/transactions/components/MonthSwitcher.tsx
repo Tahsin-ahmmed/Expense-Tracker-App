@@ -4,7 +4,7 @@ import { AppText, Icon } from '@/components/ui';
 import type { MonthKey } from '@/domain/date';
 import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
-import { colors, radius } from '@/theme';
+import { radius, createStyles } from '@/theme';
 
 export interface MonthSwitcherProps {
   month: MonthKey;
@@ -16,6 +16,7 @@ export interface MonthSwitcherProps {
 
 /** "‹ November 2026 ›" control for moving between months. */
 export function MonthSwitcher({ month, onPrevious, onNext, canGoNext }: MonthSwitcherProps) {
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <ArrowButton
@@ -47,6 +48,7 @@ interface ArrowButtonProps {
 }
 
 function ArrowButton({ label, icon, onPress, disabled = false, testID }: ArrowButtonProps) {
+  const styles = useStyles();
   return (
     <Pressable
       testID={testID}
@@ -66,7 +68,7 @@ function ArrowButton({ label, icon, onPress, disabled = false, testID }: ArrowBu
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -88,4 +90,4 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.35,
   },
-});
+}));

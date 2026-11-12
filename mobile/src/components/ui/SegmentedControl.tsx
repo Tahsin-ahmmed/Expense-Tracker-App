@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -23,6 +23,7 @@ export function SegmentedControl<T extends string>({
   onChange,
   accessibilityLabel,
 }: SegmentedControlProps<T>) {
+  const styles = useStyles();
   return (
     <View
       style={styles.track}
@@ -48,7 +49,7 @@ export function SegmentedControl<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   track: {
     flexDirection: 'row',
     padding: spacing.xs,
@@ -65,4 +66,4 @@ const styles = StyleSheet.create({
   selected: {
     backgroundColor: colors.surface,
   },
-});
+}));

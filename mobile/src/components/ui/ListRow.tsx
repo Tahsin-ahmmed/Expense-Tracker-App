@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 import { AppText } from './AppText';
 import { Icon, type IconProps } from './Icon';
@@ -28,6 +28,7 @@ export function ListRow({
   destructive = false,
   testID,
 }: ListRowProps) {
+  const styles = useStyles();
   const disabled = !onPress;
   return (
     <Pressable
@@ -74,7 +75,7 @@ export function ListRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -103,4 +104,4 @@ const styles = StyleSheet.create({
   value: {
     maxWidth: '45%',
   },
-});
+}));

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { AmountText, AppText } from '@/components/ui';
 import type { IsoDate } from '@/domain/date';
@@ -6,7 +6,7 @@ import { formatMoney } from '@/domain/money';
 import type { Transaction } from '@/domain/transaction';
 import { t } from '@/i18n';
 import { formatDateLabel } from '@/i18n/format';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 import { CATEGORY_APPEARANCE, PAYMENT_METHOD_LABEL_KEYS } from '../categoryAppearance';
 import { CategoryBadge } from './CategoryBadge';
@@ -27,6 +27,7 @@ export function TransactionRow({
   showDate = true,
   onPress,
 }: TransactionRowProps) {
+  const styles = useStyles();
   const category = t(CATEGORY_APPEARANCE[transaction.categoryId].labelKey);
   const paymentMethod = t(PAYMENT_METHOD_LABEL_KEYS[transaction.paymentMethod]);
   const date = formatDateLabel(transaction.occurredOn, today);
@@ -77,7 +78,7 @@ export function TransactionRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -93,4 +94,4 @@ const styles = StyleSheet.create({
   end: {
     alignItems: 'flex-end',
   },
-});
+}));

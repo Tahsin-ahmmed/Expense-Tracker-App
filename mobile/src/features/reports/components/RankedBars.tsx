@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
 import { formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 export interface RankedBarItem {
   key: string;
@@ -27,6 +27,7 @@ export interface RankedBarsProps {
  * so parts compare more exactly than in a pie or donut.
  */
 export function RankedBars({ items, emptyText }: RankedBarsProps) {
+  const styles = useStyles();
   if (items.length === 0) {
     return (
       <Card>
@@ -72,7 +73,7 @@ export function RankedBars({ items, emptyText }: RankedBarsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   list: {
     gap: spacing.lg,
   },
@@ -102,4 +103,4 @@ const styles = StyleSheet.create({
     minWidth: 36,
     textAlign: 'right',
   },
-});
+}));

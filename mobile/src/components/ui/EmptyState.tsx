@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -11,6 +11,7 @@ export interface EmptyStateProps {
 
 /** Shown when a list or section has no data yet. */
 export function EmptyState({ title, message }: EmptyStateProps) {
+  const styles = useStyles();
   return (
     <View style={styles.container} accessible accessibilityLabel={`${title}. ${message}`}>
       <AppText variant="heading" align="center">
@@ -23,7 +24,7 @@ export function EmptyState({ title, message }: EmptyStateProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   container: {
     alignItems: 'center',
     padding: spacing.xl,
@@ -35,4 +36,4 @@ const styles = StyleSheet.create({
   message: {
     marginTop: spacing.sm,
   },
-});
+}));

@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
-import { colors, radius, spacing, type ColorToken } from '@/theme';
+import { radius, spacing, type ColorToken, createStyles } from '@/theme';
 
 /** Whether a change is good or bad news for the user (decides the delta colour). */
 export type DeltaTone = 'good' | 'bad' | 'neutral';
@@ -23,6 +23,7 @@ export interface StatTileProps {
 
 /** A headline number with an optional change vs the previous period. */
 export function StatTile({ label, value, delta, deltaTone = 'neutral', testID }: StatTileProps) {
+  const styles = useStyles();
   return (
     <View
       style={styles.tile}
@@ -44,7 +45,7 @@ export function StatTile({ label, value, delta, deltaTone = 'neutral', testID }:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   tile: {
     flexBasis: '47%',
     flexGrow: 1,
@@ -55,4 +56,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
-});
+}));

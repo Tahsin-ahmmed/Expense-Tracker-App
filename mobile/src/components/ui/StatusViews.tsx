@@ -1,13 +1,15 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { t } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles, useColors } from '@/theme';
 
 import { AppText } from './AppText';
 import { Button } from './Button';
 
 /** Centred spinner for a loading screen or section. */
 export function LoadingState() {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.center} accessibilityLabel={t('common.loading')} accessible>
       <ActivityIndicator size="large" color={colors.primary} />
@@ -22,6 +24,7 @@ export interface ErrorStateProps {
 
 /** Error message with a retry button. */
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
+  const styles = useStyles();
   return (
     <View style={styles.center}>
       <AppText align="center" color="textSecondary" accessibilityRole="alert">
@@ -34,7 +37,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   center: {
     flex: 1,
     alignItems: 'center',
@@ -44,4 +47,4 @@ const styles = StyleSheet.create({
   action: {
     marginTop: spacing.lg,
   },
-});
+}));

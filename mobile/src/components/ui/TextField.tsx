@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputProps } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme';
+import { radius, spacing, typography, createStyles, useColors } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -16,6 +16,8 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
 
 /** Labelled text input with an inline error message. */
 export function TextField({ label, error, prefix, large = false, ...inputProps }: TextFieldProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View>
       <AppText variant="label" color="textSecondary" style={styles.label}>
@@ -44,7 +46,7 @@ export function TextField({ label, error, prefix, large = false, ...inputProps }
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   label: {
     marginBottom: spacing.xs,
   },
@@ -73,4 +75,4 @@ const styles = StyleSheet.create({
   error: {
     marginTop: spacing.xs,
   },
-});
+}));

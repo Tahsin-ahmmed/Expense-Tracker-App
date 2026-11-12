@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 
-import { colors, radius } from '@/theme';
+import { radius, createStyles, useColors } from '@/theme';
 
 import { Icon, type IconProps } from './Icon';
 
@@ -14,6 +14,8 @@ export interface IconButtonProps {
 
 /** Round filled button with only an icon, e.g. "+" to add. */
 export function IconButton({ icon, accessibilityLabel, onPress, testID }: IconButtonProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       testID={testID}
@@ -27,7 +29,7 @@ export function IconButton({ icon, accessibilityLabel, onPress, testID }: IconBu
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   button: {
     width: 48,
     height: 48,
@@ -39,4 +41,4 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: colors.primaryPressed,
   },
-});
+}));

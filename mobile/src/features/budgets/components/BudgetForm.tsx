@@ -9,7 +9,7 @@ import type { MonthKey } from '@/domain/date';
 import { currencySymbol, formatMoney, type MinorAmount } from '@/domain/money';
 import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 import { budgetFormSchema, type BudgetFormValues } from '../schema';
 
@@ -26,6 +26,7 @@ export interface BudgetFormProps {
 
 /** Form for setting, changing or removing a monthly limit. */
 export function BudgetForm({ currentLimit, month, onSave, onRemove }: BudgetFormProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [failed, setFailed] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -141,7 +142,7 @@ export function BudgetForm({ currentLimit, month, onSave, onRemove }: BudgetForm
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   flex: {
     flex: 1,
   },
@@ -168,4 +169,4 @@ const styles = StyleSheet.create({
   saveAction: {
     flex: 2,
   },
-});
+}));

@@ -1,6 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { createStyles, radius, spacing, useColors, type ColorToken } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -17,11 +17,11 @@ export interface ButtonProps {
   testID?: string;
 }
 
-const VARIANT_STYLES = {
-  primary: { text: colors.onPrimary },
-  secondary: { text: colors.primary },
-  danger: { text: colors.danger },
-} as const;
+const VARIANT_TEXT: Record<ButtonVariant, ColorToken> = {
+  primary: 'onPrimary',
+  secondary: 'primary',
+  danger: 'danger',
+};
 
 export function Button({
   label,
@@ -31,8 +31,10 @@ export function Button({
   loading = false,
   testID,
 }: ButtonProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const inactive = disabled || loading;
-  const textColor = VARIANT_STYLES[variant].text;
+  const textColor = colors[VARIANT_TEXT[variant]];
 
   return (
     <Pressable
@@ -59,7 +61,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   base: {
     minHeight: 48,
     paddingHorizontal: spacing.lg,
@@ -74,4 +76,4 @@ const styles = StyleSheet.create({
   danger: { borderWidth: 1, borderColor: colors.danger, backgroundColor: colors.surface },
   dangerPressed: { opacity: 0.8 },
   inactive: { opacity: 0.5 },
-});
+}));

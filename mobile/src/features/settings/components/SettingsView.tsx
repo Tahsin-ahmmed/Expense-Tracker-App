@@ -1,20 +1,30 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, View } from 'react-native';
 
-import { AppText, Button, Card, ListRow, SectionHeader } from '@/components/ui';
+import {
+  AppText,
+  Button,
+  Card,
+  ListRow,
+  SectionHeader,
+  SegmentedControl,
+  type SegmentOption,
+} from '@/components/ui';
 import { CURRENCIES } from '@/domain/currency';
 import { formatMoney } from '@/domain/money';
-import type { Profile } from '@/domain/profile';
+import type { Profile, ThemePreference } from '@/domain/profile';
 import { formatPhoneForDisplay } from '@/features/auth/identifier';
 import type { AuthUser } from '@/features/auth/store';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 export interface SettingsViewProps {
   user: AuthUser;
   profile: Profile;
   appVersion: string;
   onOpenProfile: () => void;
+  /** Saves the theme. Throws on failure. */
+  onChangeTheme: (theme: ThemePreference) => Promise<void>;
   onChangePin: () => void;
   /** Throws on failure; the message is shown under the row. */
   onExport: () => Promise<void>;
@@ -23,22 +33,39 @@ export interface SettingsViewProps {
   onLogOut: () => Promise<void>;
 }
 
+const THEME_OPTIONS: readonly SegmentOption<ThemePreference>[] = [
+  { value: 'system', label: t('settings.themeSystem') },
+  { value: 'light', label: t('settings.themeLight') },
+  { value: 'dark', label: t('settings.themeDark') },
+];
+
 /** Settings menu: account, preferences, data & privacy, help & about, log out. */
 export function SettingsView({
   user,
   profile,
   appVersion,
   onOpenProfile,
+  onChangeTheme,
   onChangePin,
   onExport,
   onDeleteAccount,
   onLogOut,
 }: SettingsViewProps) {
+  const styles = useStyles();
   const [message, setMessage] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const identity = user.email ?? (user.phone ? formatPhoneForDisplay(user.phone) : '');
   const name = profile.displayName ?? identity;
   const currency = CURRENCIES[profile.currency];
+
+  const changeTheme = async (theme: ThemePreference) => {
+    setMessage(null);
+    try {
+      await onChangeTheme(theme);
+    } catch {
+      setMessage(t('settings.themeError'));
+    }
+  };
 
   const exportCsv = async () => {
     setMessage(null);
@@ -123,11 +150,17 @@ export function SettingsView({
           value={formatMoney(profile.openingBalance, { decimals: 'auto' })}
           onPress={onOpenProfile}
         />
-        <ListRow
-          icon={{ ios: 'circle.lefthalf.filled', android: 'contrast' }}
-          label={t('settings.theme')}
-          caption={t('settings.comingSoon')}
-        />
+        <View style={styles.themeRow}>
+          <AppText variant="label" style={styles.themeLabel}>
+            {t('settings.theme')}
+          </AppText>
+          <SegmentedControl
+            options={THEME_OPTIONS}
+            value={profile.theme}
+            onChange={(theme) => void changeTheme(theme)}
+            accessibilityLabel={t('settings.theme')}
+          />
+        </View>
         <ListRow
           icon={{ ios: 'tag', android: 'sell' }}
           label={t('settings.categories')}
@@ -189,7 +222,14 @@ export function SettingsView({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
+  themeRow: {
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  themeLabel: {
+    marginLeft: spacing.xs,
+  },
   account: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -219,4 +259,4 @@ const styles = StyleSheet.create({
   logOut: {
     marginTop: spacing.xl,
   },
-});
+}));

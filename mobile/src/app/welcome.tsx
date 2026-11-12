@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { BackHandler, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui';
@@ -9,7 +9,7 @@ import { WelcomeForm } from '@/features/onboarding/components/WelcomeForm';
 import { useProfileStore } from '@/features/profile/useProfileStore';
 import { useToday } from '@/hooks/useToday';
 import { t } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 /**
  * First-login setup, opened as a modal over the dashboard: name, currency and
@@ -17,6 +17,7 @@ import { colors, spacing } from '@/theme';
  * back button are disabled), so every account gets a starting balance.
  */
 export default function WelcomeScreen() {
+  const styles = useStyles();
   const { today } = useToday();
   const update = useProfileStore((state) => state.update);
 
@@ -50,7 +51,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -62,4 +63,4 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.lg,
   },
-});
+}));

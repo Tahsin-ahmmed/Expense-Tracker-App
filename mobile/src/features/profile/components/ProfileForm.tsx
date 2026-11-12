@@ -9,7 +9,7 @@ import { CURRENCIES, CURRENCY_CODES, type CurrencyCode } from '@/domain/currency
 import { formatMoney, toMinor } from '@/domain/money';
 import type { Profile, ProfileUpdate } from '@/domain/profile';
 import { t, type TranslationKey } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 import {
   profileFormSchema,
@@ -42,6 +42,7 @@ function confirmCurrencyChange(to: CurrencyCode): Promise<boolean> {
 }
 
 export function ProfileForm({ profile, onSave }: ProfileFormProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [failed, setFailed] = useState(false);
   const {
@@ -181,7 +182,7 @@ export function ProfileForm({ profile, onSave }: ProfileFormProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   flex: {
     flex: 1,
   },
@@ -209,4 +210,4 @@ const styles = StyleSheet.create({
   error: {
     marginBottom: spacing.sm,
   },
-});
+}));

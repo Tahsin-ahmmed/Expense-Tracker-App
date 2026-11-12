@@ -1,6 +1,6 @@
 import { SymbolView, type AndroidSymbol, type SFSymbol } from 'expo-symbols';
 
-import { colors, type ColorToken } from '@/theme';
+import { type ColorToken, useColors } from '@/theme';
 
 export interface IconProps {
   name: { ios: SFSymbol; android: AndroidSymbol };
@@ -11,6 +11,7 @@ export interface IconProps {
 
 /** Platform icon: SF Symbols on iOS, Material Symbols on Android. Decorative only. */
 export function Icon({ name, size = 20, color = 'text' }: IconProps) {
+  const colors = useColors();
   const tint = color in colors ? colors[color as ColorToken] : color;
   return (
     <SymbolView

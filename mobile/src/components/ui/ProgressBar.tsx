@@ -1,6 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
-import { colors, radius } from '@/theme';
+import { createStyles, radius, useColors } from '@/theme';
 
 export interface ProgressBarProps {
   /** 0–100. Values outside the range are clamped. */
@@ -10,11 +10,10 @@ export interface ProgressBarProps {
 }
 
 /** Thin horizontal bar showing a share or progress. */
-export function ProgressBar({
-  percent,
-  color = colors.primary,
-  accessibilityLabel,
-}: ProgressBarProps) {
+export function ProgressBar({ percent, color, accessibilityLabel }: ProgressBarProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const fillColor = color ?? colors.primary;
   const clamped = Math.min(100, Math.max(0, percent));
   return (
     <View
@@ -22,12 +21,12 @@ export function ProgressBar({
       accessibilityRole="progressbar"
       accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(clamped) }}>
-      <View style={[styles.fill, { width: `${clamped}%`, backgroundColor: color }]} />
+      <View style={[styles.fill, { width: `${clamped}%`, backgroundColor: fillColor }]} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   track: {
     height: 8,
     borderRadius: radius.pill,
@@ -38,4 +37,4 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: radius.pill,
   },
-});
+}));

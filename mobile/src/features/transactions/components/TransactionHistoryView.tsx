@@ -13,7 +13,7 @@ import { formatMoney, toMinor } from '@/domain/money';
 import type { Transaction } from '@/domain/transaction';
 import { t } from '@/i18n';
 import { formatDateLabel, formatMonthLabel } from '@/i18n/format';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 import type { DaySection, HistoryFilter, MonthTotals, TypeFilter } from '../history';
 import { MonthSwitcher } from './MonthSwitcher';
@@ -55,6 +55,7 @@ export function TransactionHistoryView({
   today,
   onPressTransaction,
 }: TransactionHistoryViewProps) {
+  const styles = useStyles();
   const header = (
     <View style={styles.header}>
       <MonthSwitcher
@@ -157,7 +158,7 @@ export function TransactionHistoryView({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   content: {
     paddingBottom: spacing.xxl,
   },
@@ -205,10 +206,11 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));
 
 /** "Carried over from October +৳5,000" or "Starting balance +৳25,000". */
 function MonthStartRow({ start }: { start: MonthStart }) {
+  const startStyles = useStartStyles();
   const label =
     start.kind === 'carryOver'
       ? t('carryOver.from', { month: formatMonthLabel(start.fromMonth) })
@@ -231,7 +233,7 @@ function MonthStartRow({ start }: { start: MonthStart }) {
   );
 }
 
-const startStyles = StyleSheet.create({
+const useStartStyles = createStyles((colors) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -246,4 +248,4 @@ const startStyles = StyleSheet.create({
   label: {
     flex: 1,
   },
-});
+}));

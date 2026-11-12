@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles, useColors } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -16,6 +16,8 @@ export interface ChipProps {
 
 /** Selectable pill used for single-choice options (categories, payment methods, dates). */
 export function Chip({ label, selected, onPress, leading, testID }: ChipProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       testID={testID}
@@ -37,7 +39,7 @@ export function Chip({ label, selected, onPress, leading, testID }: ChipProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -56,4 +58,4 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: colors.background,
   },
-});
+}));

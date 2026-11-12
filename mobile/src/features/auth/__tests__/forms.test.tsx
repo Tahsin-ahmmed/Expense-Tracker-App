@@ -135,6 +135,7 @@ describe('SettingsView', () => {
         profile={DEFAULT_PROFILE}
         appVersion="1.0.0"
         onOpenProfile={jest.fn()}
+        onChangeTheme={jest.fn().mockResolvedValue(undefined)}
         onChangePin={jest.fn()}
         onExport={jest.fn().mockResolvedValue(undefined)}
         onDeleteAccount={jest.fn()}
@@ -190,5 +191,18 @@ describe('SettingsView', () => {
       await confirm?.onPress?.();
     });
     expect(onLogOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('switches theme and shows an error if saving fails', async () => {
+    const onChangeTheme = jest.fn().mockRejectedValue(new Error('offline'));
+    await renderSettings({ onChangeTheme });
+
+    expect(screen.getByRole('radio', { name: 'System' })).toBeSelected();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Dark' }));
+
+    expect(onChangeTheme).toHaveBeenCalledWith('dark');
+    expect(
+      await screen.findByText('Could not save the theme. Please try again.'),
+    ).toBeOnTheScreen();
   });
 });

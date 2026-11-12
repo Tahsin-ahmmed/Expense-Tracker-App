@@ -5,7 +5,7 @@ import type { BudgetStatus, MonthBudgets } from '@/domain/budget';
 import { daysInMonth, monthOf, parseIsoDate, type IsoDate } from '@/domain/date';
 import { formatMoney, toMinor } from '@/domain/money';
 import { t, type TranslationKey } from '@/i18n';
-import { colors, radius, spacing, type ColorToken } from '@/theme';
+import { radius, spacing, type ColorToken, createStyles, useColors } from '@/theme';
 
 export interface BudgetOverviewProps {
   budgets: MonthBudgets;
@@ -18,23 +18,23 @@ export interface BudgetOverviewProps {
 
 const STATUS: Record<
   BudgetStatus,
-  { color: ColorToken; soft: string; labelKey: TranslationKey; icon: IconProps['name'] }
+  { color: ColorToken; soft: ColorToken; labelKey: TranslationKey; icon: IconProps['name'] }
 > = {
   ok: {
     color: 'primary',
-    soft: colors.primarySoft,
+    soft: 'primarySoft',
     labelKey: 'budgets.statusOk',
     icon: { ios: 'checkmark.circle', android: 'check_circle' },
   },
   warning: {
     color: 'warning',
-    soft: colors.warningSoft,
+    soft: 'warningSoft',
     labelKey: 'budgets.statusWarning',
     icon: { ios: 'exclamationmark.triangle', android: 'warning' },
   },
   over: {
     color: 'danger',
-    soft: colors.dangerSoft,
+    soft: 'dangerSoft',
     labelKey: 'budgets.statusOver',
     icon: { ios: 'xmark.octagon', android: 'error' },
   },
@@ -58,6 +58,8 @@ export function BudgetOverview({
   onSetBudget,
   onOpenBudgets,
 }: BudgetOverviewProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const overCount = budgets.categories.filter((progress) => progress.status === 'over').length;
   const overText =
     overCount === 0
@@ -117,7 +119,7 @@ export function BudgetOverview({
       accessibilityHint={t('dashboard.viewBudgets')}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.row}>
-        <View style={[styles.pill, { backgroundColor: status.soft }]}>
+        <View style={[styles.pill, { backgroundColor: colors[status.soft] }]}>
           <Icon name={status.icon} size={14} color={status.color} />
           <AppText variant="caption" color={status.color}>
             {t(status.labelKey)}
@@ -175,7 +177,7 @@ export function BudgetOverview({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   gap: {
     gap: spacing.md,
   },
@@ -225,4 +227,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     backgroundColor: colors.primarySoft,
   },
-});
+}));

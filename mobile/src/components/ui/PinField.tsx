@@ -2,7 +2,7 @@ import { useRef, useState, type ComponentRef } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, createStyles } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -31,6 +31,7 @@ export function PinField({
   autoFocus = false,
   testID,
 }: PinFieldProps) {
+  const styles = useStyles();
   const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [focused, setFocused] = useState(false);
 
@@ -92,7 +93,7 @@ export function PinField({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   label: {
     marginBottom: spacing.xs,
   },
@@ -132,4 +133,4 @@ const styles = StyleSheet.create({
   error: {
     marginTop: spacing.xs,
   },
-});
+}));

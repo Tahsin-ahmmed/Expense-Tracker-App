@@ -5,7 +5,7 @@ import { OVERALL_SCOPE, type BudgetProgress, type BudgetStatus } from '@/domain/
 import { formatMoney, toMinor } from '@/domain/money';
 import { CategoryBadge } from '@/features/transactions/components/CategoryBadge';
 import { t, type TranslationKey } from '@/i18n';
-import { colors, radius, spacing, type ColorToken } from '@/theme';
+import { radius, spacing, type ColorToken, createStyles, useColors } from '@/theme';
 
 import { scopeLabel } from '../scopeLabel';
 
@@ -23,6 +23,8 @@ export interface BudgetCardProps {
 
 /** A budget's spending against its limit, with status colour. */
 export function BudgetCard({ progress, onPress }: BudgetCardProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const name = scopeLabel(progress.scope);
   const status = STATUS[progress.status];
   const statusLabel = t(status.labelKey);
@@ -87,7 +89,7 @@ export function BudgetCard({ progress, onPress }: BudgetCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   card: {
     gap: spacing.sm,
     padding: spacing.lg,
@@ -122,4 +124,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-});
+}));

@@ -5,7 +5,7 @@ import type { IsoDate } from '@/domain/date';
 import type { Transaction } from '@/domain/transaction';
 import { TransactionRow } from '@/features/transactions/components/TransactionRow';
 import { t } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 export interface RecentTransactionsProps {
   transactions: readonly Transaction[];
@@ -18,6 +18,7 @@ export function RecentTransactions({
   today,
   onPressTransaction,
 }: RecentTransactionsProps) {
+  const styles = useStyles();
   if (transactions.length === 0) {
     return (
       <EmptyState
@@ -38,7 +39,7 @@ export function RecentTransactions({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   card: {
     paddingVertical: spacing.sm,
   },
@@ -46,4 +47,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));

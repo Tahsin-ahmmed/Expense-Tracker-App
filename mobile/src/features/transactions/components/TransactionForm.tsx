@@ -24,7 +24,7 @@ import {
   type TransactionType,
 } from '@/domain/transaction';
 import { t } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles, useColors } from '@/theme';
 
 import { CATEGORY_APPEARANCE, PAYMENT_METHOD_LABEL_KEYS } from '../categoryAppearance';
 import { createTransactionFormSchema, type TransactionFormValues } from '../schema';
@@ -80,6 +80,8 @@ export function TransactionForm({
   onSubmit,
   onDelete,
 }: TransactionFormProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const [saveFailed, setSaveFailed] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
@@ -325,7 +327,7 @@ export function TransactionForm({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   flex: {
     flex: 1,
   },
@@ -363,4 +365,4 @@ const styles = StyleSheet.create({
   saveAction: {
     flex: 2,
   },
-});
+}));

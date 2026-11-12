@@ -5,7 +5,7 @@ import { OVERALL_SCOPE, type BudgetScope, type MonthBudgets } from '@/domain/bud
 import { EXPENSE_CATEGORY_IDS } from '@/domain/category';
 import { toMinor } from '@/domain/money';
 import { t } from '@/i18n';
-import { colors, spacing } from '@/theme';
+import { spacing, createStyles } from '@/theme';
 
 import { BudgetCard } from './BudgetCard';
 import { UnsetBudgetRow } from './UnsetBudgetRow';
@@ -17,6 +17,7 @@ export interface BudgetsViewProps {
 
 /** Budgets for one month: overall limit, category limits, and categories without one. */
 export function BudgetsView({ budgets, onEdit }: BudgetsViewProps) {
+  const styles = useStyles();
   const withBudget = new Set<BudgetScope>(budgets.categories.map((progress) => progress.scope));
   const withoutBudget = EXPENSE_CATEGORY_IDS.filter((id) => !withBudget.has(id));
   const categoriesExceedOverall =
@@ -79,7 +80,7 @@ export function BudgetsView({ budgets, onEdit }: BudgetsViewProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((colors) => ({
   setOverall: {
     gap: spacing.md,
   },
@@ -96,4 +97,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));

@@ -69,3 +69,19 @@ describe('budgets store', () => {
     expect(store.getState().entries).toEqual([existing]);
   });
 });
+
+describe('budgets store: reset on account change', () => {
+  it('clears entries and ignores a load that finishes after the reset', async () => {
+    let finishLoad: (entries: BudgetEntry[]) => void = () => {};
+    const store = createBudgetsStore(
+      fakeRepository({ listAll: jest.fn(() => new Promise((resolve) => (finishLoad = resolve))) }),
+    );
+
+    const pending = store.getState().load();
+    store.getState().reset();
+    finishLoad([existing]);
+    await pending;
+
+    expect(store.getState()).toMatchObject({ status: 'idle', entries: [] });
+  });
+});

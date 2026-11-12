@@ -6,6 +6,7 @@ export { Chip, type ChipProps } from './Chip';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Icon, type IconProps } from './Icon';
 export { IconButton, type IconButtonProps } from './IconButton';
+export { PinField, type PinFieldProps } from './PinField';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { Screen, type ScreenProps } from './Screen';
 export { SectionHeader, type SectionHeaderProps } from './SectionHeader';
@@ -15,4 +16,5 @@ export {
   type SegmentOption,
 } from './SegmentedControl';
 export { ErrorState, LoadingState, type ErrorStateProps } from './StatusViews';
+export { TextButton, type TextButtonProps } from './TextButton';
 export { TextField, type TextFieldProps } from './TextField';

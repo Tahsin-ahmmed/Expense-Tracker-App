@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 
 import { buildMonthBudgets, type MonthBudgets } from '@/domain/budget';
 import type { MonthKey } from '@/domain/date';
-import type { LoadStatus } from '@/features/transactions/store';
+import type { LoadStatus } from '@/lib/loadStatus';
 import { useTransactionsStore } from '@/features/transactions/useTransactionsStore';
 
 import { useBudgetsStore } from './useBudgetsStore';

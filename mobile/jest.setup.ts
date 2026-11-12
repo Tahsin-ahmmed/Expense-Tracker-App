@@ -8,7 +8,14 @@ jest.mock(
 // Icons are decorative; render nothing so tests do not depend on native symbol rendering.
 jest.mock('expo-symbols', () => ({ SymbolView: () => null }));
 
-// The real module opens a native SQLite database. Unit tests use fake repositories instead.
-jest.mock('expo-sqlite', () => ({ openDatabaseAsync: jest.fn() }));
-
 jest.mock('expo-crypto', () => ({ randomUUID: () => 'test-uuid' }));
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
+jest.mock('expo-secure-store', () => ({
+  getItemAsync: jest.fn().mockResolvedValue(null),
+  setItemAsync: jest.fn().mockResolvedValue(undefined),
+  deleteItemAsync: jest.fn().mockResolvedValue(undefined),
+}));

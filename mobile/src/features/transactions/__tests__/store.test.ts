@@ -140,3 +140,36 @@ describe('transactions store: update and remove', () => {
     expect(store.getState().transactions).toEqual([lunch]);
   });
 });
+
+describe('transactions store: reset on account change', () => {
+  it('clears data and ignores a load that finishes after the reset', async () => {
+    let finishLoad: (value: ReturnType<typeof makeTransaction>[]) => void = () => {};
+    const listAll = jest
+      .fn()
+      .mockReturnValueOnce(new Promise((resolve) => (finishLoad = resolve)))
+      .mockResolvedValueOnce([]);
+    const store = createTransactionsStore(fakeRepository({ listAll }));
+
+    const pending = store.getState().load();
+    store.getState().reset(); // account switched while loading
+    finishLoad([makeTransaction({ id: 'previous-account' })]);
+    await pending;
+
+    expect(store.getState()).toMatchObject({ status: 'idle', transactions: [] });
+  });
+
+  it('ignores a save that finishes after the reset', async () => {
+    let finishCreate: (tx: ReturnType<typeof makeTransaction>) => void = () => {};
+    const store = createTransactionsStore(
+      fakeRepository({ create: jest.fn(() => new Promise((resolve) => (finishCreate = resolve))) }),
+    );
+    await store.getState().load();
+
+    const pending = store.getState().add(newExpense);
+    store.getState().reset();
+    finishCreate(makeTransaction({ id: 'late' }));
+    await pending;
+
+    expect(store.getState().transactions).toEqual([]);
+  });
+});

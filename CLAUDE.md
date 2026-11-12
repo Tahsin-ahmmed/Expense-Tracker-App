@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1 — implemented, awaiting review. Next: M2.
+**Current milestone:** M1 done. M2 + M3 implemented together, awaiting review. Next: M4.
 
 ## 12. Repository Notes
 
@@ -185,5 +185,9 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 - Mobile source layout (`mobile/src/`): `app/` routes only (thin screens) · `components/ui/` reusable UI · `features/<name>/` feature code (components, hooks, services, types) · `domain/` plain-TS business rules (e.g. `money.ts`) · `data/` repositories (local now, Supabase in M6) · `theme/` tokens · `i18n/` strings via `t()`.
 - Never hardcode user-facing strings, colours or spacing: use `t()`, `colors`, `spacing`/`radius`, and `AppText` variants.
 - Money: `Poisha` type in `src/domain/money.ts`; use `parseTakaInput` and `formatTaka` (lakh/crore grouping).
+- Dates: transactions store `occurredOn` as an `IsoDate` calendar day in Dhaka (`src/domain/date.ts`, fixed UTC+6) plus a UTC `createdAt`. Get "today" in components via `useToday()`.
+- Local data: `expo-sqlite` behind `TransactionRepository` (`src/data/`). Schema changes = append a migration in `src/data/database.ts`; never edit a shipped one.
+- State: Zustand store per feature (`createXStore(repository)` factory + app instance). Forms: React Hook Form + Zod schema in the feature's `schema.ts`.
+- Native modules without a JS implementation are mocked in `mobile/jest.setup.ts`.
 - Test files go in `__tests__/` folders, never inside `src/app/` (every file there becomes a route).
 - Expo-specific agent rules: @mobile/AGENTS.md

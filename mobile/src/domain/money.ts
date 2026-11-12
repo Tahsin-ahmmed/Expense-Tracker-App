@@ -24,6 +24,15 @@ export function toPoisha(value: number): Poisha {
   return value as Poisha;
 }
 
+/** Adds amounts exactly. Throws if the total exceeds the safe integer range. */
+export function sumPoisha(amounts: readonly Poisha[]): Poisha {
+  let total = 0;
+  for (const amount of amounts) {
+    total += amount;
+  }
+  return toPoisha(total);
+}
+
 /** Converts Bangla digits (০–৯) to ASCII digits (0–9). Other characters are unchanged. */
 function normaliseDigits(input: string): string {
   return input.replace(/[০-৯]/g, (digit) => String(BANGLA_DIGITS.indexOf(digit)));

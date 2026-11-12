@@ -3,11 +3,6 @@ import { render, screen } from '@testing-library/react-native';
 import { EmptyState } from '../EmptyState';
 import { Screen } from '../Screen';
 
-jest.mock('react-native-safe-area-context', () => {
-  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
-  return { SafeAreaView: View };
-});
-
 describe('EmptyState', () => {
   it('shows the title and message', async () => {
     await render(<EmptyState title="No transactions yet" message="Add one to get started." />);

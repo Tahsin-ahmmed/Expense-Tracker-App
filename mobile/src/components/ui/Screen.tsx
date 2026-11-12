@@ -9,17 +9,26 @@ import { AppText } from './AppText';
 export interface ScreenProps {
   /** Large page title shown at the top of the screen. */
   title: string;
+  /** Small text above the title, e.g. a greeting. */
+  eyebrow?: string;
   children: ReactNode;
   /** Wrap content in a ScrollView. Default: true. */
   scrollable?: boolean;
 }
 
 /** Standard page container: safe area, background colour, title and padding. */
-export function Screen({ title, children, scrollable = true }: ScreenProps) {
+export function Screen({ title, eyebrow, children, scrollable = true }: ScreenProps) {
   const header = (
-    <AppText variant="title" accessibilityRole="header" style={styles.title}>
-      {title}
-    </AppText>
+    <View style={styles.header}>
+      {eyebrow ? (
+        <AppText variant="label" color="textSecondary">
+          {eyebrow}
+        </AppText>
+      ) : null}
+      <AppText variant="title" accessibilityRole="header">
+        {title}
+      </AppText>
+    </View>
   );
 
   return (
@@ -53,7 +62,7 @@ const styles = StyleSheet.create({
   fill: {
     flex: 1,
   },
-  title: {
+  header: {
     marginBottom: spacing.xl,
   },
 });

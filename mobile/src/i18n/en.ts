@@ -179,8 +179,24 @@ export const en = {
   'reports.largestExpense': 'Largest expense',
   'reports.transactionCount': 'Transactions',
   'reports.none': '—',
-  'reports.trend': 'Last 6 months',
-  'reports.trendHint': 'Tap a month to see its report.',
+  'reports.trend': 'Trend',
+  'reports.trendHint': 'Touch and drag across the chart to see each value.',
+  'reports.avgExpense.day': 'Avg. daily expense',
+  'reports.avgExpense.week': 'Avg. weekly expense',
+  'reports.avgExpense.month': 'Avg. monthly expense',
+  'reports.avgMore': '{amount} more than the previous {period}',
+  'reports.avgLess': '{amount} less than the previous {period}',
+  'reports.avgSame': 'Same as the previous {period}',
+  'reports.avgNoPrevious': 'Nothing recorded in the previous {period}',
+  'reports.period.1M': '30 days',
+  'reports.period.3M': '3 months',
+  'reports.period.6M': '6 months',
+  'reports.period.1Y': 'year',
+  'reports.range': 'Time range',
+  'reports.chartSummary':
+    '{range} trend. Average expense {average}. Highest expense {max} on {maxLabel}.',
+  'reports.tooltipIncome': 'Income: {amount}',
+  'reports.tooltipExpense': 'Expense: {amount}',
   'reports.trendMonth': '{month}: income {income}, expense {expense}',
   'reports.showTable': 'Show as table',
   'reports.hideTable': 'Hide table',
@@ -242,6 +258,16 @@ export const en = {
   'weekday.0': 'Sunday',
   'weekday.1': 'Monday',
   'weekday.6': 'Saturday',
+
+  'welcome.title': 'Welcome to HisabBondhu',
+  'welcome.subtitle':
+    'A few details to set up your account. You can change them later in Settings.',
+  'welcome.balance': 'How much money do you have right now?',
+  'welcome.balanceHint':
+    'Add up your cash, bKash/Nagad and bank balance. Enter 0 if you are not sure, or use a minus sign if you owe money.',
+  'welcome.balanceRequired': 'Enter your current balance (0 is fine).',
+  'welcome.submit': 'Get started',
+  'welcome.saveError': 'Could not save. Check your connection and try again.',
 
   'deleteAccount.title': 'Delete account',
   'deleteAccount.warning':

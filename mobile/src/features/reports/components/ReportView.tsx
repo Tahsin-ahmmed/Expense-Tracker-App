@@ -14,17 +14,20 @@ import { t } from '@/i18n';
 import { formatMonthLabel } from '@/i18n/format';
 import { spacing } from '@/theme';
 
-import type { MonthReport, MonthTotals } from '../report';
+import type { MonthReport } from '../report';
+import type { TrendRange, TrendSeries } from '../series';
+import { LineTrendChart } from './LineTrendChart';
 import { RankedBars } from './RankedBars';
 import { StatTile, type DeltaTone } from './StatTile';
-import { TrendChart } from './TrendChart';
 
 export interface ReportViewProps {
   month: MonthKey;
   report: MonthReport;
-  trend: readonly MonthTotals[];
+  trend: TrendSeries;
+  onChangeTrendRange: (range: TrendRange) => void;
+  /** Month names (January…), for chart labels. */
+  monthNames: string[];
   canGoNext: boolean;
-  onChangeMonth: (month: MonthKey) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
 }
@@ -57,8 +60,9 @@ export function ReportView({
   month,
   report,
   trend,
+  onChangeTrendRange,
+  monthNames,
   canGoNext,
-  onChangeMonth,
   onPreviousMonth,
   onNextMonth,
 }: ReportViewProps) {
@@ -138,7 +142,7 @@ export function ReportView({
       )}
 
       <SectionHeader title={t('reports.trend')} />
-      <TrendChart data={trend} selectedMonth={month} onSelectMonth={onChangeMonth} />
+      <LineTrendChart series={trend} onChangeRange={onChangeTrendRange} monthNames={monthNames} />
 
       <SectionHeader title={t('reports.byCategory')} />
       <RankedBars

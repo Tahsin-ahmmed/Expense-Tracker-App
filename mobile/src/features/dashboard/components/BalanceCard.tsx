@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText, Icon, type IconProps } from '@/components/ui';
 import type { MonthStart } from '@/domain/balance';
@@ -16,7 +16,6 @@ export interface BalanceCardProps {
   income: MinorAmount;
   expense: MinorAmount;
   today: IsoDate;
-  onSetBalance: () => void;
 }
 
 /**
@@ -30,7 +29,6 @@ export function BalanceCard({
   income,
   expense,
   today,
-  onSetBalance,
 }: BalanceCardProps) {
   const hasBalance = currentBalance !== null;
   const headline = hasBalance ? currentBalance : toMinor(income - expense);
@@ -66,25 +64,6 @@ export function BalanceCard({
         <AppText variant="caption" style={styles.muted} testID="month-start">
           {startLine}
         </AppText>
-      ) : null}
-
-      {!hasBalance ? (
-        <Pressable
-          testID="set-balance"
-          onPress={onSetBalance}
-          accessibilityRole="button"
-          accessibilityLabel={t('dashboard.setBalance')}
-          accessibilityHint={t('dashboard.setBalanceHint')}
-          style={({ pressed }) => [styles.setBalance, pressed && styles.pressed]}>
-          <Icon
-            name={{ ios: 'plus.circle', android: 'add_circle' }}
-            size={16}
-            color={colors.onPrimary}
-          />
-          <AppText variant="caption" style={styles.onPrimary}>
-            {t('dashboard.setBalance')}
-          </AppText>
-        </Pressable>
       ) : null}
 
       <View style={styles.monthBox}>
@@ -152,21 +131,6 @@ const styles = StyleSheet.create({
   },
   onPrimary: {
     color: colors.onPrimary,
-  },
-  setBalance: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.onPrimary,
-  },
-  pressed: {
-    opacity: 0.7,
   },
   monthBox: {
     marginTop: spacing.md,

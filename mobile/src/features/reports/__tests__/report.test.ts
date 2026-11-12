@@ -3,8 +3,8 @@ import { daysInMonth, type IsoDate, type MonthKey } from '@/domain/date';
 import { formatMoneyCompact, toMinor } from '@/domain/money';
 import { makeTransaction } from '@/test-utils/transactions';
 
-import { niceAxisMax } from '../components/TrendChart';
-import { buildMonthReport, buildTrend, monthTotals } from '../report';
+import { niceAxisMax } from '../axis';
+import { buildMonthReport, monthTotals } from '../report';
 
 const nov = '2026-11' as MonthKey;
 const today = '2026-11-12' as IsoDate;
@@ -127,29 +127,6 @@ describe('buildMonthReport', () => {
       dailyAverageExpense: 0,
       categories: [],
     });
-  });
-});
-
-describe('buildTrend', () => {
-  it('returns six months ending with the given month, oldest first', () => {
-    const trend = buildTrend(transactions, nov);
-    expect(trend.map((m) => m.month)).toEqual([
-      '2026-06',
-      '2026-07',
-      '2026-08',
-      '2026-09',
-      '2026-10',
-      '2026-11',
-    ]);
-    expect(trend[4]).toMatchObject({ income: 4000000, expense: 1200000 });
-  });
-
-  it('crosses year boundaries', () => {
-    expect(buildTrend([], '2027-02' as MonthKey, 3).map((m) => m.month)).toEqual([
-      '2026-12',
-      '2027-01',
-      '2027-02',
-    ]);
   });
 });
 

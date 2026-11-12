@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 
 import { clearDataOnAccountChange } from '@/features/auth/clearDataOnAccountChange';
 import { useAuthStore } from '@/features/auth/instance';
+import { useProfileStore } from '@/features/profile/useProfileStore';
 import { t } from '@/i18n';
 import { colors } from '@/theme';
 
@@ -28,12 +29,23 @@ const modal = (title: string) => ({ presentation: 'modal' as const, headerShown:
 const page = (title: string) => ({ headerShown: true, title });
 
 /**
- * Root navigator. Signed-in users only reach the app screens; signed-out
- * users only reach the sign-in screens (Expo Router protected routes).
+ * Root navigator (Expo Router protected routes):
+ * - signed out → sign-in screens only;
+ * - signed in without a starting balance → the one-time welcome setup only;
+ * - otherwise → the app.
  */
 export default function RootLayout() {
   const status = useAuthStore((state) => state.status);
   const initialize = useAuthStore((state) => state.initialize);
+  const profileStatus = useProfileStore((state) => state.status);
+  const hasStartingBalance = useProfileStore((state) => state.profile.openingBalanceDate !== null);
+  const loadProfile = useProfileStore((state) => state.load);
+
+  const signedIn = status === 'signedIn';
+  // Wait for the profile before choosing between the welcome setup and the app.
+  // If it fails to load, show the app: its screens offer "Try again".
+  const waitingForProfile = signedIn && (profileStatus === 'idle' || profileStatus === 'loading');
+  const ready = status !== 'initializing' && !waitingForProfile;
 
   useEffect(() => {
     const unsubscribe = clearDataOnAccountChange();
@@ -42,28 +54,38 @@ export default function RootLayout() {
   }, [initialize]);
 
   useEffect(() => {
-    if (status !== 'initializing') {
+    if (signedIn && profileStatus === 'idle') {
+      void loadProfile();
+    }
+  }, [signedIn, profileStatus, loadProfile]);
+
+  useEffect(() => {
+    if (ready) {
       void SplashScreen.hideAsync();
     }
-  }, [status]);
+  }, [ready]);
 
-  if (status === 'initializing') {
+  if (!ready) {
     return null;
   }
 
-  const signedIn = status === 'signedIn';
+  const needsWelcome = signedIn && profileStatus === 'ready' && !hasStartingBalance;
 
   return (
     <ThemeProvider value={navigationTheme}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={signedIn}>
+        <Stack.Protected guard={signedIn && !needsWelcome}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="add-transaction" options={modal(t('addTransaction.title'))} />
           <Stack.Screen name="edit-transaction/[id]" options={modal(t('editTransaction.title'))} />
           <Stack.Screen name="edit-budget/[scope]" options={modal(t('budgets.edit'))} />
           <Stack.Screen name="settings/profile" options={page(t('profile.title'))} />
           <Stack.Screen name="settings/delete-account" options={page(t('deleteAccount.title'))} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={needsWelcome}>
+          <Stack.Screen name="welcome" />
         </Stack.Protected>
 
         <Stack.Protected guard={!signedIn}>

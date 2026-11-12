@@ -107,12 +107,19 @@ describe('DashboardView', () => {
   });
 
   describe('balance and budget redesign', () => {
-    it('invites the user to set a balance until one exists', async () => {
-      const onSetBalance = jest.fn();
-      await renderDashboard([], [], { onSetBalance });
+    it("shows this month's net while no starting balance exists", async () => {
+      await renderDashboard([makeTransaction({ amount: 50000 })]);
 
-      await fireEvent.press(screen.getByTestId('set-balance'));
-      expect(onSetBalance).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('Balance this month')).toBeOnTheScreen();
+      expect(screen.getByTestId('balance-amount')).toHaveTextContent('-৳500.00');
+      expect(screen.queryByTestId('set-balance')).toBeNull();
+    });
+
+    it('offers add expense and add income as equal-weight actions', async () => {
+      await renderDashboard();
+
+      expect(screen.getByRole('button', { name: 'Add expense' })).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Add income' })).toBeOnTheScreen();
     });
 
     it('shows the current balance and how the month started', async () => {

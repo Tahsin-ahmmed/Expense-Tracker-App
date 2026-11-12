@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useMemo } from 'react';
 
 import { ErrorState, LoadingState, Screen } from '@/components/ui';
@@ -55,7 +54,6 @@ export default function DashboardScreen() {
           onPressTransaction={openEditTransaction}
           onSetBudget={() => openEditBudget(OVERALL_SCOPE)}
           onOpenBudgets={openBudgetsTab}
-          onSetBalance={() => router.push('/settings/profile')}
         />
       )}
     </Screen>

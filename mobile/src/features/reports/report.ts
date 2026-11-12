@@ -124,14 +124,3 @@ export function buildMonthReport(
     budgets: buildMonthBudgets(budgetEntries, transactions, month),
   };
 }
-
-/** Totals for `count` months ending with `lastMonth`, oldest first. */
-export function buildTrend(
-  transactions: readonly Transaction[],
-  lastMonth: MonthKey,
-  count = 6,
-): MonthTotals[] {
-  return Array.from({ length: count }, (_, index) =>
-    monthTotals(transactions, addMonths(lastMonth, index - count + 1)),
-  );
-}

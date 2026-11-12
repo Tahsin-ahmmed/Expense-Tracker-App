@@ -1,18 +1,18 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
-import { Button, SectionHeader } from '@/components/ui';
+import { SectionHeader } from '@/components/ui';
 import type { MonthStart } from '@/domain/balance';
 import type { MonthBudgets } from '@/domain/budget';
 import type { IsoDate } from '@/domain/date';
 import type { MinorAmount } from '@/domain/money';
 import type { Transaction, TransactionType } from '@/domain/transaction';
 import { t } from '@/i18n';
-import { spacing } from '@/theme';
 
 import type { DashboardSummary } from '../summary';
 import { BalanceCard } from './BalanceCard';
 import { BudgetOverview } from './BudgetOverview';
 import { CategoryBreakdown } from './CategoryBreakdown';
+import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
 
 export interface DashboardViewProps {
@@ -26,7 +26,6 @@ export interface DashboardViewProps {
   onPressTransaction?: (transaction: Transaction) => void;
   onSetBudget?: () => void;
   onOpenBudgets?: () => void;
-  onSetBalance?: () => void;
 }
 
 const noop = () => {};
@@ -42,7 +41,6 @@ export function DashboardView({
   onPressTransaction,
   onSetBudget = noop,
   onOpenBudgets = noop,
-  onSetBalance = noop,
 }: DashboardViewProps) {
   return (
     <View>
@@ -53,26 +51,9 @@ export function DashboardView({
         income={summary.income}
         expense={summary.expense}
         today={today}
-        onSetBalance={onSetBalance}
       />
 
-      <View style={styles.actions}>
-        <View style={styles.action}>
-          <Button
-            label={t('dashboard.addExpense')}
-            onPress={() => onAdd('expense')}
-            testID="add-expense"
-          />
-        </View>
-        <View style={styles.action}>
-          <Button
-            label={t('dashboard.addIncome')}
-            onPress={() => onAdd('income')}
-            variant="secondary"
-            testID="add-income"
-          />
-        </View>
-      </View>
+      <QuickActions onAdd={onAdd} />
 
       <SectionHeader title={t('dashboard.budget')} />
       <BudgetOverview
@@ -94,14 +75,3 @@ export function DashboardView({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-  action: {
-    flex: 1,
-  },
-});

@@ -19,7 +19,9 @@ export const colors = {
   textMuted: '#8A949C',
 
   income: '#12805C',
+  incomeSoft: '#E7F5EF',
   expense: '#C2410C',
+  expenseSoft: '#FDEEE6',
   danger: '#B42318',
   dangerSoft: '#FDECEC',
   warning: '#B54708',

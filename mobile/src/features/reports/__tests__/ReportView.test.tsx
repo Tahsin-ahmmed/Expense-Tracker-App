@@ -4,7 +4,8 @@ import type { IsoDate, MonthKey } from '@/domain/date';
 import { makeTransaction } from '@/test-utils/transactions';
 
 import { ReportView, type ReportViewProps } from '../components/ReportView';
-import { buildMonthReport, buildTrend } from '../report';
+import { buildMonthReport } from '../report';
+import { buildTrendSeries } from '../series';
 
 const nov = '2026-11' as MonthKey;
 const today = '2026-11-12' as IsoDate;
@@ -36,9 +37,23 @@ function renderReport(month: MonthKey = nov, overrides: Partial<ReportViewProps>
     <ReportView
       month={month}
       report={buildMonthReport(transactions, [], month, today)}
-      trend={buildTrend(transactions, month)}
+      trend={buildTrendSeries(transactions, '6M', today, 6)}
+      onChangeTrendRange={jest.fn()}
+      monthNames={[
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ]}
       canGoNext={month < nov}
-      onChangeMonth={jest.fn()}
       onPreviousMonth={jest.fn()}
       onNextMonth={jest.fn()}
       {...overrides}
@@ -72,28 +87,29 @@ describe('ReportView', () => {
     expect(screen.getByTestId('tile-savings-rate')).toHaveTextContent(/No income/);
   });
 
-  it('selects a month from the trend chart and shows its values', async () => {
-    const onChangeMonth = jest.fn();
-    await renderReport(nov, { onChangeMonth });
+  it('shows the average with its change, and switches range', async () => {
+    const onChangeTrendRange = jest.fn();
+    await renderReport(nov, { onChangeTrendRange });
 
-    expect(screen.getByTestId('trend-readout')).toHaveTextContent(
-      /November 2026.*Income ৳50,000.00.*Expense ৳15,000.00/,
+    // 6 months (Jun–Nov): expenses ৳20,000 (Oct) + ৳15,000 (Nov) = ৳35,000 / 6
+    expect(screen.getByTestId('trend-average')).toHaveTextContent('৳5,833.33');
+    expect(screen.getByTestId('trend-change')).toHaveTextContent(
+      'Nothing recorded in the previous 6 months',
     );
-    await fireEvent.press(screen.getByTestId('trend-2026-10'));
-    expect(onChangeMonth).toHaveBeenCalledWith('2026-10');
+
+    await fireEvent.press(screen.getByTestId('range-1Y'));
+    expect(onChangeTrendRange).toHaveBeenCalledWith('1Y');
   });
 
-  it('describes each trend month for screen readers and offers a table view', async () => {
+  it('summarises the chart for screen readers and offers a table view', async () => {
     await renderReport();
 
-    expect(
-      screen.getByRole('button', {
-        name: 'October 2026: income ৳40,000.00, expense ৳20,000.00',
-      }),
-    ).toBeOnTheScreen();
-
+    expect(screen.getByTestId('line-chart')).toHaveProp(
+      'accessibilityLabel',
+      '6M trend. Average expense ৳5,833.33. Highest expense ৳20,000.00 on Oct.',
+    );
     expect(screen.queryByTestId('trend-table')).toBeNull();
     await fireEvent.press(screen.getByTestId('toggle-trend-table'));
-    expect(screen.getByTestId('trend-table')).toHaveTextContent(/Oct.*৳40,000.*৳20,000.*৳20,000/);
+    expect(screen.getByTestId('trend-table')).toHaveTextContent(/Oct.*৳40,000.*৳20,000/);
   });
 });

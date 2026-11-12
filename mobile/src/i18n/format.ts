@@ -21,6 +21,11 @@ function monthName(month: number): string {
   return t(MONTH_KEYS[month - 1]);
 }
 
+/** Short month names in the current language ("Jan" … "Dec"). */
+export function monthNames(): string[] {
+  return MONTH_KEYS.map((key) => t(key).slice(0, 3));
+}
+
 /** "2026-11" → "November 2026". */
 export function formatMonthLabel(month: MonthKey): string {
   const [year, monthNumber] = month.split('-').map(Number);

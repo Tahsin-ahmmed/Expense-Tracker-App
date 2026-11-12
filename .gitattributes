@@ -1,0 +1,5 @@
+# Keep LF line endings in the repo and working tree (matches Prettier).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary

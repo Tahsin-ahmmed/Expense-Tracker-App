@@ -30,6 +30,11 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Icon sf="chart.pie" md="pie_chart" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="reports">
+        <NativeTabs.Trigger.Label>{t('tabs.reports')}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="chart.bar" md="bar_chart" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Label>{t('tabs.settings')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />

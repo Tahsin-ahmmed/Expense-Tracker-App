@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1–M5 done. M6 implemented (Supabase schema + auth + app switched to Supabase), awaiting device test. Next: M7.
+**Current milestone:** M1–M6 done (M6 awaiting device confirmation). M7 implemented, awaiting review. Next: M8.
 
 ## 12. Repository Notes
 

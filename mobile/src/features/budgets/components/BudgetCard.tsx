@@ -17,10 +17,11 @@ const STATUS: Record<BudgetStatus, { color: ColorToken; labelKey: TranslationKey
 
 export interface BudgetCardProps {
   progress: BudgetProgress;
-  onPress: () => void;
+  /** Makes the card tappable (edit). Omit for a read-only card, e.g. in reports. */
+  onPress?: () => void;
 }
 
-/** A budget's spending against its limit, with status colour. Tap to edit. */
+/** A budget's spending against its limit, with status colour. */
 export function BudgetCard({ progress, onPress }: BudgetCardProps) {
   const name = scopeLabel(progress.scope);
   const status = STATUS[progress.status];
@@ -39,10 +40,12 @@ export function BudgetCard({ progress, onPress }: BudgetCardProps) {
     <Pressable
       testID={`budget-${progress.scope}`}
       onPress={onPress}
-      accessibilityRole="button"
+      disabled={!onPress}
+      accessible
+      accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={`${name}, ${statusLabel}, ${spentOfLimit}, ${remainder}`}
-      accessibilityHint={t('budgets.edit')}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+      accessibilityHint={onPress ? t('budgets.edit') : undefined}
+      style={({ pressed }) => [styles.card, pressed && onPress && styles.pressed]}>
       <View style={styles.header}>
         {progress.scope === OVERALL_SCOPE ? (
           <View style={styles.overallIcon}>

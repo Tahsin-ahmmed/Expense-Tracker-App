@@ -84,6 +84,12 @@ export function monthOf(date: IsoDate): MonthKey {
   return date.slice(0, 7) as MonthKey;
 }
 
+/** Number of days in a month (28–31). */
+export function daysInMonth(month: MonthKey): number {
+  const [year, monthNumber] = month.split('-').map(Number);
+  return new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+}
+
 /** Adds (or subtracts) whole months to a month key. "2026-01" − 1 → "2025-12". */
 export function addMonths(month: MonthKey, months: number): MonthKey {
   const [year, monthNumber] = month.split('-').map(Number);

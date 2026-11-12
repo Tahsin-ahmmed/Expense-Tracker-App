@@ -79,6 +79,28 @@ function groupSouthAsian(digits: string): string {
   return `${rest},${lastThree}`;
 }
 
+/**
+ * Short Taka for chart axes, using Bangladeshi units:
+ * ৳950, ৳25K (thousand), ৳1.5L (lakh = 1,00,000), ৳1.2Cr (crore = 1,00,00,000).
+ * Whole Taka only; full amounts belong in labels and tooltips.
+ */
+export function formatTakaCompact(amount: Poisha): string {
+  const taka = Math.abs(amount) / POISHA_PER_TAKA;
+  const sign = amount < 0 ? '-' : '';
+  const units: [number, string][] = [
+    [10_000_000, 'Cr'],
+    [100_000, 'L'],
+    [1_000, 'K'],
+  ];
+  for (const [size, suffix] of units) {
+    if (taka >= size) {
+      const value = Math.round((taka / size) * 10) / 10;
+      return `${sign}${TAKA_SYMBOL}${String(value).replace(/\.0$/, '')}${suffix}`;
+    }
+  }
+  return `${sign}${TAKA_SYMBOL}${Math.round(taka)}`;
+}
+
 export interface FormatTakaOptions {
   /** Prefix with ৳. Default: true. */
   showSymbol?: boolean;

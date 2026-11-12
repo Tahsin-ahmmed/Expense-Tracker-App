@@ -21,6 +21,16 @@ const MIGRATIONS: readonly string[] = [
   );
   CREATE INDEX idx_transactions_occurred_on ON transactions (occurred_on DESC, created_at DESC);
   `,
+  // v2 (M5): monthly budget history. limit_poisha NULL = budget removed from that month on.
+  `
+  CREATE TABLE budgets (
+    scope          TEXT NOT NULL,
+    effective_from TEXT NOT NULL,
+    limit_poisha   INTEGER CHECK (limit_poisha IS NULL OR limit_poisha > 0),
+    updated_at     TEXT NOT NULL,
+    PRIMARY KEY (scope, effective_from)
+  );
+  `,
 ];
 
 async function migrate(db: SQLiteDatabase): Promise<SQLiteDatabase> {

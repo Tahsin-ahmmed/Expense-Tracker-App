@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1–M3 done. M4 implemented, awaiting review. Next: M5.
+**Current milestone:** M1–M4 done. M5 implemented, awaiting review. Next: M6.
 
 ## 12. Repository Notes
 
@@ -189,5 +189,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 - Local data: `expo-sqlite` behind `TransactionRepository` (`src/data/`). Schema changes = append a migration in `src/data/database.ts`; never edit a shipped one.
 - State: Zustand store per feature (`createXStore(repository)` factory + app instance). Forms: React Hook Form + Zod schema in the feature's `schema.ts`.
 - Native modules without a JS implementation are mocked in `mobile/jest.setup.ts`.
+- Budgets are stored as history (`scope`, `effective_from` month, nullable limit): the limit for a month is the latest entry not after it. Edits apply from the current month onward; never rewrite past months.
+- `t(key, params)` supports `{name}` placeholders. Use whole-sentence templates, never concatenated fragments, so Bangla can reorder words.
 - Test files go in `__tests__/` folders, never inside `src/app/` (every file there becomes a route).
 - Expo-specific agent rules: @mobile/AGENTS.md

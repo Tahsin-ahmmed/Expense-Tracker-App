@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Button, SectionHeader } from '@/components/ui';
+import type { MonthBudgets } from '@/domain/budget';
 import type { IsoDate } from '@/domain/date';
 import type { Transaction, TransactionType } from '@/domain/transaction';
 import { t } from '@/i18n';
@@ -14,13 +15,26 @@ import { RecentTransactions } from './RecentTransactions';
 
 export interface DashboardViewProps {
   summary: DashboardSummary;
+  budgets: MonthBudgets;
   today: IsoDate;
   onAdd: (type: TransactionType) => void;
   onPressTransaction?: (transaction: Transaction) => void;
+  onSetBudget?: () => void;
+  onOpenBudgets?: () => void;
 }
 
+const noop = () => {};
+
 /** The dashboard's sections, rendered from a prepared summary (no data access). */
-export function DashboardView({ summary, today, onAdd, onPressTransaction }: DashboardViewProps) {
+export function DashboardView({
+  summary,
+  budgets,
+  today,
+  onAdd,
+  onPressTransaction,
+  onSetBudget = noop,
+  onOpenBudgets = noop,
+}: DashboardViewProps) {
   return (
     <View>
       <BalanceCard balance={summary.balance} income={summary.income} expense={summary.expense} />
@@ -47,7 +61,7 @@ export function DashboardView({ summary, today, onAdd, onPressTransaction }: Das
       <CategoryBreakdown categories={summary.topCategories} />
 
       <SectionHeader title={t('dashboard.budget')} />
-      <BudgetOverview />
+      <BudgetOverview budgets={budgets} onSetBudget={onSetBudget} onOpenBudgets={onOpenBudgets} />
 
       <SectionHeader title={t('dashboard.recentTransactions')} />
       <RecentTransactions

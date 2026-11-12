@@ -1,6 +1,7 @@
 import type { IsoDate, MonthKey } from '@/domain/date';
 
 import { formatDateLabel, formatMonthLabel, greetingFor } from '../format';
+import { t } from '../index';
 
 const today = '2026-11-12' as IsoDate;
 
@@ -32,5 +33,13 @@ describe('greetingFor', () => {
     [2, 'Good evening'],
   ])('hour %i → %s', (hour, expected) => {
     expect(greetingFor(hour)).toBe(expected);
+  });
+});
+
+describe('t() placeholders', () => {
+  it('replaces named placeholders and leaves unknown ones', () => {
+    expect(t('budgets.spentOfLimit', { spent: '৳1', limit: '৳2' })).toBe('৳1 of ৳2');
+    expect(t('budgets.amountLeft', {})).toBe('{amount} left');
+    expect(t('budgets.overall')).toBe('Monthly budget');
   });
 });

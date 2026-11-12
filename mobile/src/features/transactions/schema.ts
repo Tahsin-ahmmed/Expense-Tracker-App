@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import { isCategoryForType, isCategoryId } from '@/domain/category';
 import { isIsoDate, type IsoDate } from '@/domain/date';
-import { parseTakaInput } from '@/domain/money';
 import {
   NOTE_MAX_LENGTH,
   PAYMENT_METHODS,
@@ -10,6 +9,7 @@ import {
   type NewTransaction,
 } from '@/domain/transaction';
 import { t } from '@/i18n';
+import { validateAmountInput } from '@/lib/amountInput';
 
 /** Raw values held by the form while the user edits. */
 export interface TransactionFormValues {
@@ -36,14 +36,9 @@ export function createTransactionFormSchema(today: IsoDate) {
       note: z.string(),
     })
     .superRefine((values, ctx) => {
-      const amountText = values.amount.trim();
-      const amount = parseTakaInput(amountText);
-      if (amountText === '') {
-        ctx.addIssue({ code: 'custom', path: ['amount'], message: t('validation.amountRequired') });
-      } else if (amount === null) {
-        ctx.addIssue({ code: 'custom', path: ['amount'], message: t('validation.amountInvalid') });
-      } else if (amount <= 0) {
-        ctx.addIssue({ code: 'custom', path: ['amount'], message: t('validation.amountPositive') });
+      const amount = validateAmountInput(values.amount);
+      if (!amount.ok) {
+        ctx.addIssue({ code: 'custom', path: ['amount'], message: amount.message });
       }
 
       if (!isCategoryId(values.categoryId) || !isCategoryForType(values.categoryId, values.type)) {
@@ -70,14 +65,14 @@ export function createTransactionFormSchema(today: IsoDate) {
     })
     .transform((values): NewTransaction => {
       // superRefine guarantees these checks pass before transform runs.
-      const amount = parseTakaInput(values.amount);
-      if (amount === null || !isCategoryId(values.categoryId) || !isIsoDate(values.occurredOn)) {
+      const amount = validateAmountInput(values.amount);
+      if (!amount.ok || !isCategoryId(values.categoryId) || !isIsoDate(values.occurredOn)) {
         throw new Error('Unreachable: transaction form values were not validated');
       }
       const note = values.note.trim();
       return {
         type: values.type,
-        amount,
+        amount: amount.amount,
         categoryId: values.categoryId,
         paymentMethod: values.paymentMethod,
         occurredOn: values.occurredOn,

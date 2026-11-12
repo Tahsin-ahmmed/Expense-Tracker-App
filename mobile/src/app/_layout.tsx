@@ -43,6 +43,14 @@ export default function RootLayout() {
             title: t('editTransaction.title'),
           }}
         />
+        <Stack.Screen
+          name="edit-budget/[scope]"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: t('budgets.edit'),
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );

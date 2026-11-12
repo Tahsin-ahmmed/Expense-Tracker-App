@@ -1,5 +1,6 @@
 export { AmountText, type AmountTextProps } from './AmountText';
 export { AppText, type AppTextProps } from './AppText';
+export { BrandMark, type BrandMarkProps } from './BrandMark';
 export { Button, type ButtonProps } from './Button';
 export { Card, type CardProps } from './Card';
 export { Chip, type ChipProps } from './Chip';

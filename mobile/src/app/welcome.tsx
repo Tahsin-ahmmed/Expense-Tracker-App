@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { BackHandler, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText } from '@/components/ui';
+import { AppText, BrandMark } from '@/components/ui';
 import type { ProfileUpdate } from '@/domain/profile';
 import { WelcomeForm } from '@/features/onboarding/components/WelcomeForm';
 import { useProfileStore } from '@/features/profile/useProfileStore';
@@ -41,6 +41,7 @@ export default function WelcomeScreen() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <BrandMark size={72} />
           <AppText variant="title" accessibilityRole="header">
             {t('welcome.title')}
           </AppText>

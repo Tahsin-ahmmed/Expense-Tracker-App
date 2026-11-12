@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useDisplayCurrency } from '@/lib/displayCurrency';
-import { spacing, createStyles } from '@/theme';
+import { spacing, createStyles, useColorSchemeResolved } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -12,6 +12,8 @@ export interface ScreenProps {
   title: string;
   /** Small text above the title, e.g. a greeting. */
   eyebrow?: string;
+  /** Element shown to the left of the title, e.g. the app logo. */
+  leading?: ReactNode;
   /** Element shown to the right of the title, e.g. an add button. */
   action?: ReactNode;
   children: ReactNode;
@@ -23,14 +25,25 @@ export interface ScreenProps {
 }
 
 /** Standard page container: safe area, background colour, title and padding. */
-export function Screen({ title, eyebrow, action, children, scrollable = true }: ScreenProps) {
+export function Screen({
+  title,
+  eyebrow,
+  leading,
+  action,
+  children,
+  scrollable = true,
+}: ScreenProps) {
   const styles = useStyles();
   // Remount the content when the display currency changes so every amount updates.
   const currency = useDisplayCurrency((state) => state.currency);
-  const content = <Fragment key={currency}>{children}</Fragment>;
+  // Rebuild the content when the theme changes too: guarantees every native view
+  // repaints with the new palette (some kept a stale background otherwise).
+  const scheme = useColorSchemeResolved();
+  const content = <Fragment key={`${currency}-${scheme}`}>{children}</Fragment>;
 
   const header = (
     <View style={styles.header}>
+      {leading}
       <View style={styles.titles}>
         {eyebrow ? (
           <AppText variant="label" color="textSecondary">

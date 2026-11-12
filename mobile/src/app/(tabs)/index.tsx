@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ErrorState, LoadingState, Screen } from '@/components/ui';
+import { BrandMark, ErrorState, LoadingState, Screen } from '@/components/ui';
 import { currentBalance, monthStart } from '@/domain/balance';
 import { OVERALL_SCOPE } from '@/domain/budget';
 import { monthOf } from '@/domain/date';
@@ -33,12 +33,12 @@ export default function DashboardScreen() {
     [transactions, profile, month],
   );
 
-  const greeting = profile.displayName
-    ? `${greetingFor(hour)}, ${profile.displayName}`
-    : greetingFor(hour);
+  // First name only: "Good evening, Tahsin".
+  const firstName = profile.displayName?.trim().split(/s+/)[0];
+  const greeting = firstName ? `${greetingFor(hour)}, ${firstName}` : greetingFor(hour);
 
   return (
-    <Screen title={formatMonthLabel(month)} eyebrow={greeting}>
+    <Screen title={formatMonthLabel(month)} eyebrow={greeting} leading={<BrandMark size={44} />}>
       {status === 'error' ? (
         <ErrorState message={t('dashboard.loadError')} onRetry={retry} />
       ) : status !== 'ready' ? (

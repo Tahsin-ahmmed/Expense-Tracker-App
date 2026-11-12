@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText, Icon } from '@/components/ui';
+import { AppText, BrandMark } from '@/components/ui';
 import { t } from '@/i18n';
-import { radius, spacing, createStyles, useColors } from '@/theme';
+import { createStyles, spacing } from '@/theme';
 
 export interface AuthScaffoldProps {
   title: string;
@@ -14,7 +14,6 @@ export interface AuthScaffoldProps {
 /** Shared layout for the sign-in screens: brand header, title and form. */
 export function AuthScaffold({ title, children }: AuthScaffoldProps) {
   const styles = useStyles();
-  const colors = useColors();
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -22,13 +21,7 @@ export function AuthScaffold({ title, children }: AuthScaffoldProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <View style={styles.logo}>
-              <Icon
-                name={{ ios: 'banknote', android: 'account_balance_wallet' }}
-                size={32}
-                color={colors.onPrimary}
-              />
-            </View>
+            <BrandMark size={96} />
             <AppText variant="title">{t('app.name')}</AppText>
             <AppText color="textSecondary">{t('auth.tagline')}</AppText>
           </View>
@@ -71,15 +64,6 @@ const useStyles = createStyles((colors) => ({
     alignItems: 'center',
     gap: spacing.xs,
     marginBottom: spacing.xxl,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.lg,
-    backgroundColor: colors.primary,
-    marginBottom: spacing.sm,
   },
   title: {
     marginBottom: spacing.lg,

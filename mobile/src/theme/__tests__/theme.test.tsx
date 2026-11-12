@@ -1,7 +1,9 @@
 import { act, render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 
-import { AppText } from '@/components/ui';
+import { useEffect } from 'react';
+
+import { AppText, Screen } from '@/components/ui';
 
 import { darkColors, lightColors } from '../colors';
 import {
@@ -79,5 +81,24 @@ describe('theme hooks', () => {
 
     await act(async () => setThemePreference('dark'));
     expect(screen.getByTestId('themed-text')).toHaveStyle({ color: darkColors.text });
+  });
+
+  it('rebuilds screen content when the theme changes, so no view keeps old colours', async () => {
+    const mounts = jest.fn();
+    function Child() {
+      useEffect(() => {
+        mounts();
+      }, []);
+      return null;
+    }
+    await render(
+      <Screen title="Reports">
+        <Child />
+      </Screen>,
+    );
+    expect(mounts).toHaveBeenCalledTimes(1);
+
+    await act(async () => setThemePreference('dark'));
+    expect(mounts).toHaveBeenCalledTimes(2);
   });
 });

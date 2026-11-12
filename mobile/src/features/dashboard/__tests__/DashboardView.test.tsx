@@ -35,7 +35,7 @@ describe('DashboardView', () => {
     expect(screen.getByTestId('income-amount')).toHaveTextContent('৳50,000.00');
     expect(screen.getByTestId('expense-amount')).toHaveTextContent('৳16,250.50');
     expect(screen.getByText('92%')).toBeOnTheScreen();
-    expect(screen.getByText('Biryani')).toBeOnTheScreen();
+    expect(screen.getByText('Biryani · Cash')).toBeOnTheScreen();
     expect(screen.getByText('−৳1,250.50')).toBeOnTheScreen();
     expect(screen.getByText('+৳50,000.00')).toBeOnTheScreen();
   });

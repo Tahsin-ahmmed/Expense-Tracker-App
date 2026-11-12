@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { IsoDate } from '@/domain/date';
 import { toPoisha } from '@/domain/money';
 
-import { createSqliteTransactionRepository } from '../transactionRepository';
+import { createSqliteTransactionRepository, NotFoundError } from '../transactionRepository';
 
 function setup(rows: unknown[] = []) {
   const db = {
@@ -85,5 +85,43 @@ describe('SQLite transaction repository', () => {
       '2026-11-01',
       '2026-11-12T04:30:00.000Z',
     ]);
+  });
+});
+
+describe('SQLite transaction repository: update and remove', () => {
+  const changes = {
+    type: 'expense' as const,
+    amount: toPoisha(30000),
+    categoryId: 'transport' as const,
+    paymentMethod: 'cash' as const,
+    note: 'Rickshaw',
+    occurredOn: '2026-11-10' as IsoDate,
+  };
+
+  it('updates editable fields by id with bound parameters', async () => {
+    const { db, repository } = setup();
+
+    await repository.update('a', changes);
+
+    const [sql, params] = db.runAsync.mock.calls[0];
+    expect(sql).toContain('UPDATE transactions');
+    expect(sql).not.toContain('created_at');
+    expect(params).toEqual(['expense', 30000, 'transport', 'cash', 'Rickshaw', '2026-11-10', 'a']);
+  });
+
+  it('deletes by id', async () => {
+    const { db, repository } = setup();
+
+    await repository.remove('a');
+
+    expect(db.runAsync).toHaveBeenCalledWith('DELETE FROM transactions WHERE id = ?', ['a']);
+  });
+
+  it('throws NotFoundError when no row matches', async () => {
+    const { db, repository } = setup();
+    db.runAsync.mockResolvedValue({ changes: 0, lastInsertRowId: 0 });
+
+    await expect(repository.update('missing', changes)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(repository.remove('missing')).rejects.toBeInstanceOf(NotFoundError);
   });
 });

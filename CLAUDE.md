@@ -173,7 +173,7 @@ Work proceeds one milestone at a time, in order. Do not start a milestone's feat
 | M8 | Web admin panel |
 | M9 | Testing and deployment |
 
-**Current milestone:** M1 done. M2 + M3 implemented together, awaiting review. Next: M4.
+**Current milestone:** M1–M3 done. M4 implemented, awaiting review. Next: M5.
 
 ## 12. Repository Notes
 

@@ -1,11 +1,10 @@
-import { router } from 'expo-router';
 import { useEffect, useMemo } from 'react';
 
 import { ErrorState, LoadingState, Screen } from '@/components/ui';
 import { monthOf } from '@/domain/date';
-import type { TransactionType } from '@/domain/transaction';
 import { DashboardView } from '@/features/dashboard/components/DashboardView';
 import { buildDashboardSummary } from '@/features/dashboard/summary';
+import { openAddTransaction, openEditTransaction } from '@/features/transactions/navigation';
 import { useTransactionsStore } from '@/features/transactions/useTransactionsStore';
 import { useToday } from '@/hooks/useToday';
 import { t } from '@/i18n';
@@ -25,10 +24,6 @@ export default function DashboardScreen() {
 
   const summary = useMemo(() => buildDashboardSummary(transactions, today), [transactions, today]);
 
-  const openAdd = (type: TransactionType) => {
-    router.push({ pathname: '/add-transaction', params: { type } });
-  };
-
   return (
     <Screen title={formatMonthLabel(monthOf(today))} eyebrow={greetingFor(hour)}>
       {status === 'error' ? (
@@ -36,7 +31,12 @@ export default function DashboardScreen() {
       ) : status !== 'ready' ? (
         <LoadingState />
       ) : (
-        <DashboardView summary={summary} today={today} onAdd={openAdd} />
+        <DashboardView
+          summary={summary}
+          today={today}
+          onAdd={openAddTransaction}
+          onPressTransaction={openEditTransaction}
+        />
       )}
     </Screen>
   );

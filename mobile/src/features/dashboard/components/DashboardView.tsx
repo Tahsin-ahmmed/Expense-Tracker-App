@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Button, SectionHeader } from '@/components/ui';
 import type { IsoDate } from '@/domain/date';
-import type { TransactionType } from '@/domain/transaction';
+import type { Transaction, TransactionType } from '@/domain/transaction';
 import { t } from '@/i18n';
 import { spacing } from '@/theme';
 
@@ -16,10 +16,11 @@ export interface DashboardViewProps {
   summary: DashboardSummary;
   today: IsoDate;
   onAdd: (type: TransactionType) => void;
+  onPressTransaction?: (transaction: Transaction) => void;
 }
 
 /** The dashboard's sections, rendered from a prepared summary (no data access). */
-export function DashboardView({ summary, today, onAdd }: DashboardViewProps) {
+export function DashboardView({ summary, today, onAdd, onPressTransaction }: DashboardViewProps) {
   return (
     <View>
       <BalanceCard balance={summary.balance} income={summary.income} expense={summary.expense} />
@@ -49,7 +50,11 @@ export function DashboardView({ summary, today, onAdd }: DashboardViewProps) {
       <BudgetOverview />
 
       <SectionHeader title={t('dashboard.recentTransactions')} />
-      <RecentTransactions transactions={summary.recent} today={today} />
+      <RecentTransactions
+        transactions={summary.recent}
+        today={today}
+        onPressTransaction={onPressTransaction}
+      />
     </View>
   );
 }

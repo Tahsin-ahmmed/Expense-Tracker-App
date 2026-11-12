@@ -4,15 +4,24 @@ import { colors, radius, spacing } from '@/theme';
 
 import { AppText } from './AppText';
 
+export type ButtonVariant = 'primary' | 'secondary' | 'danger';
+
 export interface ButtonProps {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  /** primary: filled green · secondary: soft green · danger: outlined red (destructive). */
+  variant?: ButtonVariant;
   disabled?: boolean;
   /** Shows a spinner and blocks presses. */
   loading?: boolean;
   testID?: string;
 }
+
+const VARIANT_STYLES = {
+  primary: { text: colors.onPrimary },
+  secondary: { text: colors.primary },
+  danger: { text: colors.danger },
+} as const;
 
 export function Button({
   label,
@@ -22,8 +31,8 @@ export function Button({
   loading = false,
   testID,
 }: ButtonProps) {
-  const isPrimary = variant === 'primary';
   const inactive = disabled || loading;
+  const textColor = VARIANT_STYLES[variant].text;
 
   return (
     <Pressable
@@ -35,14 +44,14 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       style={({ pressed }) => [
         styles.base,
-        isPrimary ? styles.primary : styles.secondary,
-        pressed && (isPrimary ? styles.primaryPressed : styles.secondaryPressed),
+        styles[variant],
+        pressed && styles[`${variant}Pressed`],
         inactive && styles.inactive,
       ]}>
       {loading ? (
-        <ActivityIndicator color={isPrimary ? colors.onPrimary : colors.primary} />
+        <ActivityIndicator color={textColor} />
       ) : (
-        <AppText variant="label" style={{ color: isPrimary ? colors.onPrimary : colors.primary }}>
+        <AppText variant="label" style={{ color: textColor }}>
           {label}
         </AppText>
       )}
@@ -62,5 +71,7 @@ const styles = StyleSheet.create({
   primaryPressed: { backgroundColor: colors.primaryPressed },
   secondary: { backgroundColor: colors.primarySoft },
   secondaryPressed: { opacity: 0.8 },
+  danger: { borderWidth: 1, borderColor: colors.danger, backgroundColor: colors.surface },
+  dangerPressed: { opacity: 0.8 },
   inactive: { opacity: 0.5 },
 });

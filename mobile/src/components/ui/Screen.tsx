@@ -11,23 +11,31 @@ export interface ScreenProps {
   title: string;
   /** Small text above the title, e.g. a greeting. */
   eyebrow?: string;
+  /** Element shown to the right of the title, e.g. an add button. */
+  action?: ReactNode;
   children: ReactNode;
-  /** Wrap content in a ScrollView. Default: true. */
+  /**
+   * Wrap content in a ScrollView. Default: true. Set false when the content
+   * is its own list (FlatList/SectionList) so lists are not nested.
+   */
   scrollable?: boolean;
 }
 
 /** Standard page container: safe area, background colour, title and padding. */
-export function Screen({ title, eyebrow, children, scrollable = true }: ScreenProps) {
+export function Screen({ title, eyebrow, action, children, scrollable = true }: ScreenProps) {
   const header = (
     <View style={styles.header}>
-      {eyebrow ? (
-        <AppText variant="label" color="textSecondary">
-          {eyebrow}
+      <View style={styles.titles}>
+        {eyebrow ? (
+          <AppText variant="label" color="textSecondary">
+            {eyebrow}
+          </AppText>
+        ) : null}
+        <AppText variant="title" accessibilityRole="header">
+          {title}
         </AppText>
-      ) : null}
-      <AppText variant="title" accessibilityRole="header">
-        {title}
-      </AppText>
+      </View>
+      {action}
     </View>
   );
 
@@ -61,8 +69,15 @@ const styles = StyleSheet.create({
   },
   fill: {
     flex: 1,
+    paddingBottom: 0,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.md,
     marginBottom: spacing.xl,
+  },
+  titles: {
+    flex: 1,
   },
 });

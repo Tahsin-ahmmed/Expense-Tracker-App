@@ -13,6 +13,10 @@ export interface TransactionsState {
   load: () => Promise<void>;
   /** Saves a transaction and adds it to the list. Rejects if saving fails. */
   add: (input: NewTransaction) => Promise<Transaction>;
+  /** Saves changes to a transaction. Rejects if saving fails; the list is then unchanged. */
+  update: (id: string, input: NewTransaction) => Promise<void>;
+  /** Deletes a transaction. Rejects if deleting fails; the list is then unchanged. */
+  remove: (id: string) => Promise<void>;
 }
 
 /** Creates the transactions store around a repository (injected for testing). */
@@ -41,6 +45,22 @@ export function createTransactionsStore(repository: TransactionRepository) {
         transactions: [saved, ...state.transactions].sort(compareNewestFirst),
       }));
       return saved;
+    },
+
+    async update(id, input) {
+      await repository.update(id, input);
+      set((state) => ({
+        transactions: state.transactions
+          .map((tx) => (tx.id === id ? { ...tx, ...input } : tx))
+          .sort(compareNewestFirst),
+      }));
+    },
+
+    async remove(id) {
+      await repository.remove(id);
+      set((state) => ({
+        transactions: state.transactions.filter((tx) => tx.id !== id),
+      }));
     },
   }));
 }

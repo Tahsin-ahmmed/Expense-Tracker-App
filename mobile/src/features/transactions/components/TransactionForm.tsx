@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -15,11 +15,12 @@ import {
 } from '@/components/ui';
 import { categoriesFor, isCategoryForType, isCategoryId } from '@/domain/category';
 import type { IsoDate } from '@/domain/date';
-import { TAKA_SYMBOL } from '@/domain/money';
+import { formatTaka, TAKA_SYMBOL } from '@/domain/money';
 import {
   NOTE_MAX_LENGTH,
   PAYMENT_METHODS,
   type NewTransaction,
+  type Transaction,
   type TransactionType,
 } from '@/domain/transaction';
 import { t } from '@/i18n';
@@ -30,10 +31,40 @@ import { createTransactionFormSchema, type TransactionFormValues } from '../sche
 import { DateField } from './DateField';
 
 export interface TransactionFormProps {
-  initialType: TransactionType;
+  /** Type preselected when adding. Ignored when `transaction` is given. */
+  initialType?: TransactionType;
+  /** Existing transaction to edit. Omit to add a new one. */
+  transaction?: Transaction;
   today: IsoDate;
   /** Persists the transaction. Throw to show a save error. */
   onSubmit: (input: NewTransaction) => Promise<void>;
+  /** Shows a Delete button (after confirmation). Throw to show a delete error. */
+  onDelete?: () => Promise<void>;
+}
+
+function toFormValues(
+  transaction: Transaction | undefined,
+  initialType: TransactionType,
+  today: IsoDate,
+): TransactionFormValues {
+  if (!transaction) {
+    return {
+      type: initialType,
+      amount: '',
+      categoryId: '',
+      paymentMethod: 'cash',
+      occurredOn: today,
+      note: '',
+    };
+  }
+  return {
+    type: transaction.type,
+    amount: formatTaka(transaction.amount, { showSymbol: false, decimals: 'auto' }),
+    categoryId: transaction.categoryId,
+    paymentMethod: transaction.paymentMethod,
+    occurredOn: transaction.occurredOn,
+    note: transaction.note ?? '',
+  };
 }
 
 const TYPE_OPTIONS: readonly SegmentOption<TransactionType>[] = [
@@ -41,11 +72,20 @@ const TYPE_OPTIONS: readonly SegmentOption<TransactionType>[] = [
   { value: 'income', label: t('transactionType.income') },
 ];
 
-/** Form for adding an income or expense. Validation lives in `schema.ts`. */
-export function TransactionForm({ initialType, today, onSubmit }: TransactionFormProps) {
+/** Form for adding or editing an income or expense. Validation lives in `schema.ts`. */
+export function TransactionForm({
+  initialType = 'expense',
+  transaction,
+  today,
+  onSubmit,
+  onDelete,
+}: TransactionFormProps) {
   const insets = useSafeAreaInsets();
   const [saveFailed, setSaveFailed] = useState(false);
+  const [deleteFailed, setDeleteFailed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const schema = useMemo(() => createTransactionFormSchema(today), [today]);
+  const isEditing = transaction !== undefined;
 
   const {
     control,
@@ -55,15 +95,36 @@ export function TransactionForm({ initialType, today, onSubmit }: TransactionFor
     formState: { errors, isSubmitting },
   } = useForm<TransactionFormValues, unknown, NewTransaction>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      type: initialType,
-      amount: '',
-      categoryId: '',
-      paymentMethod: 'cash',
-      occurredOn: today,
-      note: '',
-    },
+    defaultValues: toFormValues(transaction, initialType, today),
   });
+
+  const confirmDelete = () => {
+    if (!onDelete) {
+      return;
+    }
+    Alert.alert(
+      t('editTransaction.deleteConfirmTitle'),
+      t('editTransaction.deleteConfirmMessage'),
+      [
+        { text: t('editTransaction.deleteCancel'), style: 'cancel' },
+        {
+          text: t('editTransaction.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            setDeleteFailed(false);
+            setDeleting(true);
+            try {
+              await onDelete();
+            } catch {
+              setDeleteFailed(true);
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const type = useWatch({ control, name: 'type' });
 
@@ -108,7 +169,7 @@ export function TransactionForm({ initialType, today, onSubmit }: TransactionFor
               onBlur={field.onBlur}
               placeholder={t('addTransaction.amountPlaceholder')}
               keyboardType="decimal-pad"
-              autoFocus
+              autoFocus={!isEditing}
               large
               error={errors.amount?.message}
               prefix={
@@ -231,12 +292,34 @@ export function TransactionForm({ initialType, today, onSubmit }: TransactionFor
             {t('addTransaction.saveError')}
           </AppText>
         ) : null}
-        <Button
-          testID="save-transaction"
-          label={isSubmitting ? t('common.saving') : t('common.save')}
-          onPress={submit}
-          loading={isSubmitting}
-        />
+        {deleteFailed ? (
+          <AppText color="danger" align="center" accessibilityRole="alert" style={styles.saveError}>
+            {t('editTransaction.deleteError')}
+          </AppText>
+        ) : null}
+        <View style={styles.actions}>
+          {onDelete ? (
+            <View style={styles.deleteAction}>
+              <Button
+                testID="delete-transaction"
+                label={t('editTransaction.delete')}
+                onPress={confirmDelete}
+                variant="danger"
+                loading={deleting}
+                disabled={isSubmitting}
+              />
+            </View>
+          ) : null}
+          <View style={styles.saveAction}>
+            <Button
+              testID="save-transaction"
+              label={isSubmitting ? t('common.saving') : t('common.save')}
+              onPress={submit}
+              loading={isSubmitting}
+              disabled={deleting}
+            />
+          </View>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -269,5 +352,15 @@ const styles = StyleSheet.create({
   },
   saveError: {
     marginBottom: spacing.sm,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  deleteAction: {
+    flex: 1,
+  },
+  saveAction: {
+    flex: 2,
   },
 });

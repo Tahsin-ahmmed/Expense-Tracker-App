@@ -10,9 +10,14 @@ import { colors, spacing } from '@/theme';
 export interface RecentTransactionsProps {
   transactions: readonly Transaction[];
   today: IsoDate;
+  onPressTransaction?: (transaction: Transaction) => void;
 }
 
-export function RecentTransactions({ transactions, today }: RecentTransactionsProps) {
+export function RecentTransactions({
+  transactions,
+  today,
+  onPressTransaction,
+}: RecentTransactionsProps) {
   if (transactions.length === 0) {
     return (
       <EmptyState
@@ -26,7 +31,7 @@ export function RecentTransactions({ transactions, today }: RecentTransactionsPr
     <Card style={styles.card}>
       {transactions.map((transaction, index) => (
         <View key={transaction.id} style={index > 0 && styles.separated}>
-          <TransactionRow transaction={transaction} today={today} />
+          <TransactionRow transaction={transaction} today={today} onPress={onPressTransaction} />
         </View>
       ))}
     </Card>

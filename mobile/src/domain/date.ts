@@ -84,6 +84,15 @@ export function monthOf(date: IsoDate): MonthKey {
   return date.slice(0, 7) as MonthKey;
 }
 
+/** Adds (or subtracts) whole months to a month key. "2026-01" − 1 → "2025-12". */
+export function addMonths(month: MonthKey, months: number): MonthKey {
+  const [year, monthNumber] = month.split('-').map(Number);
+  const index = year * 12 + (monthNumber - 1) + months;
+  const nextYear = Math.floor(index / 12);
+  const nextMonth = (index % 12) + 1;
+  return `${pad(nextYear, 4)}-${pad(nextMonth)}` as MonthKey;
+}
+
 /**
  * Converts a date chosen in a device date picker to an IsoDate.
  * Pickers return the chosen calendar day in the device's own time zone.

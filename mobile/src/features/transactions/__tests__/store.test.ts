@@ -14,8 +14,17 @@ function fakeRepository(overrides: Partial<TransactionRepository> = {}): Transac
       id: 'new',
       createdAt: '2026-11-12T10:00:00.000Z',
     })),
+    update: jest.fn().mockResolvedValue(undefined),
+    remove: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   };
+}
+
+async function readyStore(overrides: Partial<TransactionRepository> = {}) {
+  const repository = fakeRepository(overrides);
+  const store = createTransactionsStore(repository);
+  await store.getState().load();
+  return { repository, store };
 }
 
 const newExpense: NewTransaction = {
@@ -73,5 +82,61 @@ describe('transactions store', () => {
 
     await expect(store.getState().add(newExpense)).rejects.toThrow('full');
     expect(store.getState().transactions).toEqual([]);
+  });
+});
+
+describe('transactions store: update and remove', () => {
+  const lunch = makeTransaction({ id: 'lunch', occurredOn: '2026-11-05', amount: 20000 });
+  const rent = makeTransaction({ id: 'rent', occurredOn: '2026-11-01', categoryId: 'rent' });
+
+  it('updates a transaction and keeps newest-first order', async () => {
+    const { repository, store } = await readyStore({
+      listAll: jest.fn().mockResolvedValue([lunch, rent]),
+    });
+
+    const changes: NewTransaction = { ...newExpense, occurredOn: '2026-10-30' as IsoDate };
+    await store.getState().update('lunch', changes);
+
+    expect(repository.update).toHaveBeenCalledWith('lunch', changes);
+    const updated = store.getState().transactions;
+    expect(updated.map((tx) => tx.id)).toEqual(['rent', 'lunch']);
+    expect(updated[1]).toMatchObject({
+      id: 'lunch',
+      amount: 5000,
+      categoryId: 'transport',
+      occurredOn: '2026-10-30',
+      createdAt: lunch.createdAt,
+    });
+  });
+
+  it('keeps the list unchanged when an update fails', async () => {
+    const { store } = await readyStore({
+      listAll: jest.fn().mockResolvedValue([lunch]),
+      update: jest.fn().mockRejectedValue(new Error('disk')),
+    });
+
+    await expect(store.getState().update('lunch', newExpense)).rejects.toThrow('disk');
+    expect(store.getState().transactions).toEqual([lunch]);
+  });
+
+  it('removes a transaction', async () => {
+    const { repository, store } = await readyStore({
+      listAll: jest.fn().mockResolvedValue([lunch, rent]),
+    });
+
+    await store.getState().remove('lunch');
+
+    expect(repository.remove).toHaveBeenCalledWith('lunch');
+    expect(store.getState().transactions.map((tx) => tx.id)).toEqual(['rent']);
+  });
+
+  it('keeps the transaction when deleting fails', async () => {
+    const { store } = await readyStore({
+      listAll: jest.fn().mockResolvedValue([lunch]),
+      remove: jest.fn().mockRejectedValue(new Error('locked')),
+    });
+
+    await expect(store.getState().remove('lunch')).rejects.toThrow('locked');
+    expect(store.getState().transactions).toEqual([lunch]);
   });
 });

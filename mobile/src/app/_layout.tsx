@@ -35,6 +35,14 @@ export default function RootLayout() {
             title: t('addTransaction.title'),
           }}
         />
+        <Stack.Screen
+          name="edit-transaction/[id]"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: t('editTransaction.title'),
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );

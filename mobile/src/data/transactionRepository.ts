@@ -18,6 +18,17 @@ export interface TransactionRepository {
   /** All transactions, newest first. */
   listAll(): Promise<Transaction[]>;
   create(input: NewTransaction): Promise<Transaction>;
+  /** Replaces the editable fields of an existing transaction. Throws `NotFoundError` if missing. */
+  update(id: string, input: NewTransaction): Promise<void>;
+  /** Permanently deletes a transaction. Throws `NotFoundError` if missing. */
+  remove(id: string): Promise<void>;
+}
+
+export class NotFoundError extends Error {
+  constructor(id: string) {
+    super(`Transaction not found: ${id}`);
+    this.name = 'NotFoundError';
+  }
 }
 
 interface TransactionRow {
@@ -98,6 +109,36 @@ export function createSqliteTransactionRepository({
         ],
       );
       return transaction;
+    },
+
+    async update(id, input) {
+      const db = await getDatabase();
+      const result = await db.runAsync(
+        `UPDATE transactions
+            SET type = ?, amount_poisha = ?, category_id = ?, payment_method = ?,
+                note = ?, occurred_on = ?
+          WHERE id = ?`,
+        [
+          input.type,
+          input.amount,
+          input.categoryId,
+          input.paymentMethod,
+          input.note,
+          input.occurredOn,
+          id,
+        ],
+      );
+      if (result.changes === 0) {
+        throw new NotFoundError(id);
+      }
+    },
+
+    async remove(id) {
+      const db = await getDatabase();
+      const result = await db.runAsync('DELETE FROM transactions WHERE id = ?', [id]);
+      if (result.changes === 0) {
+        throw new NotFoundError(id);
+      }
     },
   };
 }

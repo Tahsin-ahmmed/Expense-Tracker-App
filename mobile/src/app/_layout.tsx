@@ -76,7 +76,8 @@ export default function RootLayout() {
     <ThemeProvider value={navigationTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={signedIn}>
+        {/* Signed out (e.g. a fresh install opening hisabbondhu:///) → Log in. */}
+        <Stack.Protected guard={signedIn} redirectTo="/sign-in">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="add-transaction" options={modal(t('addTransaction.title'))} />
           <Stack.Screen name="edit-transaction/[id]" options={modal(t('editTransaction.title'))} />
@@ -90,7 +91,8 @@ export default function RootLayout() {
           />
         </Stack.Protected>
 
-        <Stack.Protected guard={!signedIn}>
+        {/* Signed in → the dashboard instead of the sign-in screens. */}
+        <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
 

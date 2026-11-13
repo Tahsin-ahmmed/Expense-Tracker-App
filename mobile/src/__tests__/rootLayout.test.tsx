@@ -1,4 +1,5 @@
 import { Text } from 'react-native';
+import { Slot } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
 import RootLayout from '@/app/_layout';
@@ -32,9 +33,9 @@ const Named = (name: string) =>
 
 const routes = {
   _layout: RootLayout,
-  '(tabs)/_layout': { default: require('expo-router').Slot },
+  '(tabs)/_layout': { default: Slot },
   '(tabs)/index': Named('Dashboard'),
-  '(auth)/_layout': { default: require('expo-router').Slot },
+  '(auth)/_layout': { default: Slot },
   '(auth)/sign-in': Named('Log in'),
   '(auth)/sign-up': Named('Create account'),
   'add-transaction': Named('Add'),

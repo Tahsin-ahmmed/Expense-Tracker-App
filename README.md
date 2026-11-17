@@ -16,6 +16,23 @@ monthly budgets and see where your money goes. It speaks Taka natively (৳1,00,
 lakh/crore grouping), understands bKash and Nagad as payment methods, and keeps each
 person's financial data private at the database level.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard: current balance, monthly budget and spending by category" width="200" />
+  <img src="docs/screenshots/transactions.png" alt="Transactions grouped by day with daily totals" width="200" />
+  <img src="docs/screenshots/budgets.png" alt="Monthly budget progress and per-category budgets" width="200" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/reports.png" alt="Reports: income, expense, savings rate and trend chart" width="200" />
+  <img src="docs/screenshots/settings.png" alt="Settings: profile, currency, opening balance and theme" width="200" />
+  <img src="docs/screenshots/login-dark.png" alt="Log in screen in dark mode" width="200" />
+</p>
+
+<p align="center">
+  <sub>Dashboard · Transactions · Budgets · Reports · Settings · Log in (dark mode)</sub>
+</p>
+
 ## Features
 
 - **Sign in with email or a Bangladeshi mobile number** and a 6-digit PIN; easy PINs
